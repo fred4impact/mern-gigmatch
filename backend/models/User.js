@@ -201,6 +201,10 @@ const userSchema = new mongoose.Schema({
       showLocation: { type: Boolean, default: true },
       showContact: { type: Boolean, default: false }
     }
+  },
+  deleted: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true,

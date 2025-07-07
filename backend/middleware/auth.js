@@ -11,8 +11,14 @@ const protect = async (req, res, next) => {
       // Get token from header
       token = req.headers.authorization.split(' ')[1];
 
+      // DEBUG: Log the JWT secret being used
+      console.log('JWT_SECRET in middleware:', process.env.JWT_SECRET);
+
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+      // DEBUG: Log the decoded token
+      console.log('Decoded JWT payload:', decoded);
 
       // Get user from token
       req.user = await User.findById(decoded.id).select('-password');

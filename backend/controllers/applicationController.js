@@ -367,6 +367,32 @@ const getApplicationStats = async (req, res) => {
   }
 };
 
+// Get application by ID
+const getApplicationById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const application = await Application.findById(id)
+      .populate([
+        { path: 'event', select: 'title type location date budget status createdBy' },
+        { path: 'talent', select: 'firstName lastName email avatar category subcategory' }
+      ]);
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+    // Only allow the talent or the event creator to view
+    if (
+      application.talent.toString() !== req.user.id.toString() &&
+      application.event.createdBy.toString() !== req.user.id.toString()
+    ) {
+      return res.status(403).json({ message: 'Not authorized to view this application' });
+    }
+    res.json({ success: true, data: application });
+  } catch (error) {
+    console.error('Get application by ID error:', error);
+    res.status(500).json({ message: 'Error fetching application' });
+  }
+};
+
 module.exports = {
   applyToEvent,
   getMyApplications,
@@ -375,5 +401,6 @@ module.exports = {
   rejectApplication,
   withdrawApplication,
   markAsRead,
-  getApplicationStats
+  getApplicationStats,
+  getApplicationById
 }; 
