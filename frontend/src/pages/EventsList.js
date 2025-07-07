@@ -16,6 +16,7 @@ import {
   FaTimes
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import './EventsList.css';
 
 const EventsList = () => {
   const { user } = useAuth();
@@ -124,189 +125,157 @@ const EventsList = () => {
 
   if (loading) {
     return (
-      <div className="dashboard-container" style={{ maxWidth: '1100px', margin: '2rem auto', padding: '2rem 1rem' }}>
-        <div className="dashboard-card">
-          <div className="text-center">
-            <div className="dashboard-spinner"></div>
-            <p>Loading events...</p>
+      <div className="el-container">
+        <div className="el-header">
+          <h1 className="el-title">Browse Events</h1>
+          <p className="el-subtitle">Find the perfect gig opportunities for your skills</p>
+        </div>
+        <hr className="el-divider" />
+        {/* Filters */}
+        <div className="el-filters-row">
+          <div className="el-filter-group">
+            <label className="el-filter-label">Event Type</label>
+            <input
+              type="text"
+              name="type"
+              value={filters.type}
+              onChange={handleFilterChange}
+              className="el-filter-input"
+              placeholder="e.g., Wedding, Corporate"
+            />
           </div>
+          <div className="el-filter-group">
+            <label className="el-filter-label">Location</label>
+            <input
+              type="text"
+              name="location"
+              value={filters.location}
+              onChange={handleFilterChange}
+              className="el-filter-input"
+              placeholder="e.g., New York, Los Angeles"
+            />
+          </div>
+          <div className="el-filter-group">
+            <label className="el-filter-label">Status</label>
+            <select
+              name="status"
+              value={filters.status}
+              onChange={handleFilterChange}
+              className="el-filter-input"
+            >
+              <option value="">All Status</option>
+              <option value="open">Open</option>
+              <option value="closed">Closed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="el-btn el-btn-secondary"
+          >
+            Clear Filters
+          </button>
+        </div>
+        {/* Events Grid */}
+        <div className="el-events-grid">
+          <div className="el-loading">Loading events...</div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="dashboard-container" style={{ maxWidth: '1100px', margin: '2rem auto', padding: '2rem 1rem' }}>
-      <div className="dashboard-card">
-        <div className="dashboard-card-header">
-          <h1 className="dashboard-card-title">Browse Events</h1>
-          <p className="dashboard-card-subtitle">
-            Find the perfect gig opportunities for your skills
-          </p>
+    <div className="el-container">
+      <div className="el-header">
+        <h1 className="el-title">Browse Events</h1>
+        <p className="el-subtitle">Find the perfect gig opportunities for your skills</p>
+      </div>
+      <hr className="el-divider" />
+      {/* Filters */}
+      <div className="el-filters-row">
+        <div className="el-filter-group">
+          <label className="el-filter-label">Event Type</label>
+          <input
+            type="text"
+            name="type"
+            value={filters.type}
+            onChange={handleFilterChange}
+            className="el-filter-input"
+            placeholder="e.g., Wedding, Corporate"
+          />
         </div>
-
-        {/* Filters */}
-        <div className="dashboard-card-body">
-          <h3 className="dashboard-section-title">
-            <FaFilter className="dashboard-form-icon" /> Filters
-          </h3>
-          <div className="dashboard-form-row">
-            <div className="dashboard-form-group">
-              <label className="dashboard-form-label">Event Type</label>
-              <input
-                type="text"
-                name="type"
-                value={filters.type}
-                onChange={handleFilterChange}
-                className="dashboard-form-input"
-                placeholder="e.g., Wedding, Corporate"
-              />
-            </div>
-            <div className="dashboard-form-group">
-              <label className="dashboard-form-label">Location</label>
-              <input
-                type="text"
-                name="location"
-                value={filters.location}
-                onChange={handleFilterChange}
-                className="dashboard-form-input"
-                placeholder="e.g., New York, Los Angeles"
-              />
-            </div>
-            <div className="dashboard-form-group">
-              <label className="dashboard-form-label">Status</label>
-              <select
-                name="status"
-                value={filters.status}
-                onChange={handleFilterChange}
-                className="dashboard-form-input"
-              >
-                <option value="">All Status</option>
-                <option value="open">Open</option>
-                <option value="closed">Closed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={clearFilters}
-            className="dashboard-btn dashboard-btn-secondary"
+        <div className="el-filter-group">
+          <label className="el-filter-label">Location</label>
+          <input
+            type="text"
+            name="location"
+            value={filters.location}
+            onChange={handleFilterChange}
+            className="el-filter-input"
+            placeholder="e.g., New York, Los Angeles"
+          />
+        </div>
+        <div className="el-filter-group">
+          <label className="el-filter-label">Status</label>
+          <select
+            name="status"
+            value={filters.status}
+            onChange={handleFilterChange}
+            className="el-filter-input"
           >
-            Clear Filters
-          </button>
+            <option value="">All Status</option>
+            <option value="open">Open</option>
+            <option value="closed">Closed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
         </div>
-
-        {/* Events List */}
-        <div className="dashboard-card-body">
-          <h3 className="dashboard-section-title">
-            Events ({events.length})
-          </h3>
-          
-          {events.length === 0 ? (
-            <div className="text-center py-4">
-              <p>No events found matching your criteria.</p>
-              {['planner', 'studio'].includes(user?.role) && (
-                <Link to="/create-event" className="dashboard-btn dashboard-btn-primary">
-                  Create Your First Event
-                </Link>
-              )}
-            </div>
-          ) : (
-            <div className="events-grid">
-              {events.map((event) => {
-                const applicationStatus = getApplicationStatus(event._id);
-                const displayStatus = getEventDisplayStatus(event, applicationStatus);
-                const cardClass = getEventCardClass(event, applicationStatus);
-                
-                return (
-                  <div key={event._id} className={cardClass}>
-                    <div className="event-card-header">
-                      <h4 className="event-card-title">{event.title}</h4>
-                      <span 
-                        className={`event-status event-status-${displayStatus.status}`}
-                        style={{ color: displayStatus.color }}
-                      >
-                        {displayStatus.icon && <span className="status-icon">{displayStatus.icon}</span>}
-                        {displayStatus.label}
-                      </span>
-                    </div>
-                  
-                  <div className="event-card-body">
-                    {event.description && (
-                      <p className="event-description">
-                        {event.description.length > 150 
-                          ? `${event.description.substring(0, 150)}...` 
-                          : event.description
-                        }
-                      </p>
-                    )}
-                    
-                    <div className="event-details">
-                      {event.type && (
-                        <div className="event-detail">
-                          <FaTag className="event-detail-icon" />
-                          <span>{event.type}</span>
-                        </div>
-                      )}
-                      
-                      {event.location?.city && (
-                        <div className="event-detail">
-                          <FaMapMarkerAlt className="event-detail-icon" />
-                          <span>{event.location.city}, {event.location.state}</span>
-                        </div>
-                      )}
-                      
-                      {event.date && (
-                        <div className="event-detail">
-                          <FaCalendarAlt className="event-detail-icon" />
-                          <span>{formatDate(event.date)}</span>
-                        </div>
-                      )}
-                      
-                      {event.budget && (
-                        <div className="event-detail">
-                          <FaDollarSign className="event-detail-icon" />
-                          <span>{formatBudget(event.budget)}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {event.tags && event.tags.length > 0 && (
-                      <div className="event-tags">
-                        {event.tags.slice(0, 3).map((tag, index) => (
-                          <span key={index} className="event-tag">{tag}</span>
-                        ))}
-                        {event.tags.length > 3 && (
-                          <span className="event-tag">+{event.tags.length - 3} more</span>
-                        )}
-                      </div>
-                    )}
+        <button
+          type="button"
+          onClick={clearFilters}
+          className="el-btn el-btn-secondary"
+        >
+          Clear Filters
+        </button>
+      </div>
+      {/* Events Grid */}
+      <div className="el-events-grid">
+        {events.length === 0 ? (
+          <div className="el-empty">No events found.</div>
+        ) : (
+          events.map(event => {
+            const applicationStatus = getApplicationStatus(event._id);
+            const displayStatus = getEventDisplayStatus(event, applicationStatus);
+            return (
+              <div key={event._id} className={`el-event-card ${displayStatus.status}`}>
+                <div className="el-event-card-header">
+                  <span className="el-event-title">{event.title}</span>
+                  <span className={`el-status-badge ${displayStatus.status}`}>{displayStatus.icon} {displayStatus.label}</span>
+                </div>
+                <div className="el-event-card-body">
+                  <div className="el-event-info-row">
+                    <span className="el-event-info"><FaTag /> {event.type}</span>
+                    <span className="el-event-info">
+                      <FaMapMarkerAlt />
+                      {event.location?.city || ''}
+                      {event.location?.state ? `, ${event.location.state}` : ''}
+                      {event.location?.country ? `, ${event.location.country}` : ''}
+                    </span>
                   </div>
-                  
-                  <div className="event-card-footer">
-                    <Link 
-                      to={`/events/${event._id}`}
-                      className="dashboard-btn dashboard-btn-primary"
-                    >
-                      <FaEye /> View Details
-                    </Link>
-                    {user?.role === 'talent' && !applicationStatus && event.status === 'open' && (
-                      <Link 
-                        to={`/events/${event._id}`}
-                        className="dashboard-btn dashboard-btn-success"
-                        style={{ marginLeft: '8px' }}
-                      >
-                        <FaSearch /> Apply Now
-                      </Link>
-                    )}
+                  <div className="el-event-info-row">
+                    <span className="el-event-info"><FaCalendarAlt /> {formatDate(event.date)}</span>
+                    <span className="el-event-info"><FaDollarSign /> {formatBudget(event.budget)}</span>
                   </div>
                 </div>
-              );
-            })}
-            </div>
-          )}
-        </div>
+                <div className="el-event-card-footer">
+                  <Link to={`/events/${event._id}`} className="el-btn el-btn-primary">
+                    <FaEye /> View
+                  </Link>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
     </div>
   );

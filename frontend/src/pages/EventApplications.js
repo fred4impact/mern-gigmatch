@@ -19,6 +19,7 @@ import {
   FaEnvelope
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import './EventApplications.css';
 
 const EventApplications = () => {
   const { user } = useAuth();
@@ -167,229 +168,131 @@ const EventApplications = () => {
   }
 
   return (
-    <div className="dashboard-container event-applications-page" style={{ maxWidth: '1100px', margin: '2rem auto', padding: '2rem 1rem' }}>
-      <div className="dashboard-card">
-        <div className="dashboard-card-header">
-          <h1 className="dashboard-card-title">Event Applications</h1>
-          <p className="dashboard-card-subtitle">
-            Review and manage applications for your events
-          </p>
+    <div className="ea-container">
+      <div className="ea-card ea-main-card">
+        <div className="ea-header">
+          <h1 className="ea-title">Event Applications</h1>
+          <p className="ea-subtitle">Review and manage applications for your events</p>
         </div>
-
+        <hr className="ea-divider" />
         {/* Stats Cards */}
-        <div className="dashboard-card-body">
-          <div className="applications-stats">
-            <div className="stat-card">
-              <div className="stat-icon pending">
-                <FaClock />
-              </div>
-              <div className="stat-content">
-                <div className="stat-number">{stats.pending || 0}</div>
-                <div className="stat-label">Pending</div>
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon accepted">
-                <FaCheck />
-              </div>
-              <div className="stat-content">
-                <div className="stat-number">{stats.accepted || 0}</div>
-                <div className="stat-label">Accepted</div>
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon rejected">
-                <FaTimes />
-              </div>
-              <div className="stat-content">
-                <div className="stat-number">{stats.rejected || 0}</div>
-                <div className="stat-label">Rejected</div>
-              </div>
-            </div>
-            <div className="stat-card">
-              <div className="stat-icon withdrawn">
-                <FaUndo />
-              </div>
-              <div className="stat-content">
-                <div className="stat-number">{stats.withdrawn || 0}</div>
-                <div className="stat-label">Withdrawn</div>
-              </div>
+        <div className="ea-stats-row">
+          <div className="ea-stat-card pending">
+            <FaClock className="ea-stat-icon" />
+            <div className="ea-stat-info">
+              <div className="ea-stat-number">{stats.pending || 0}</div>
+              <div className="ea-stat-label">Pending</div>
             </div>
           </div>
-
-          {/* Event Selection */}
-          <div className="event-selection mb-4">
-            <label className="form-label">Select Event:</label>
-            <select 
-              value={selectedEvent?._id || ''} 
-              onChange={(e) => {
-                const event = events.find(evt => evt._id === e.target.value);
-                setSelectedEvent(event);
-                setCurrentPage(1);
-              }}
-              className="form-select"
-            >
-              <option value="">Choose an event...</option>
-              {events.map(event => (
-                <option key={event._id} value={event._id}>
-                  {event.title} - {formatDate(event.date)}
-                </option>
-              ))}
-            </select>
+          <div className="ea-stat-card accepted">
+            <FaCheck className="ea-stat-icon" />
+            <div className="ea-stat-info">
+              <div className="ea-stat-number">{stats.accepted || 0}</div>
+              <div className="ea-stat-label">Accepted</div>
+            </div>
           </div>
-
-          {selectedEvent && (
-            <>
-              {/* Filters */}
-              <div className="applications-filters">
-                <div className="filter-group">
-                  <label>Filter by Status:</label>
-                  <select 
-                    value={selectedStatus} 
-                    onChange={(e) => {
-                      setSelectedStatus(e.target.value);
-                      setCurrentPage(1);
-                    }}
-                    className="filter-select"
-                  >
-                    <option value="">All Applications</option>
-                    <option value="pending">Pending</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="rejected">Rejected</option>
-                    <option value="withdrawn">Withdrawn</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Applications List */}
-              <div className="applications-list">
-                {loading ? (
-                  <div className="text-center py-4">
-                    <div className="spinner-border" role="status">
-                      <span className="visually-hidden">Loading...</span>
-                    </div>
-                  </div>
-                ) : applications.length === 0 ? (
-                  <div className="text-center py-4">
-                    <FaPaperPlane className="text-muted mb-3" style={{ fontSize: '3rem' }} />
-                    <h5>No applications found</h5>
-                    <p className="text-muted">No applications match your current filters.</p>
-                  </div>
-                ) : (
-                  <>
-                    {applications.map((application) => (
-                      <div key={application._id} className="application-card">
-                        <div className="application-header">
-                          <div className="application-talent">
-                            <div className="talent-avatar">
-                              {application.talent?.avatar ? (
-                                <img src={application.talent.avatar} alt={application.talent.firstName} />
-                              ) : (
-                                <FaUser />
-                              )}
-                            </div>
-                            <div className="talent-info">
-                              <h6>{application.talent?.firstName} {application.talent?.lastName}</h6>
-                              <p className="talent-category">
-                                {application.talent?.category} • {application.talent?.subcategory}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="application-status">
-                            {getStatusIcon(application.status)}
-                            <span style={{ color: getStatusColor(application.status) }}>
-                              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
-                            </span>
-                          </div>
-                        </div>
-
-                        <div className="application-details">
-                          <div className="application-message">
-                            <strong>Message:</strong>
-                            <p>{application.message || 'No message provided'}</p>
-                          </div>
-                          
-                          <div className="application-info">
-                            <div className="info-item">
-                              <FaDollarSign />
-                              <span><strong>Proposed Rate:</strong> {formatBudget(application.proposedRate)}</span>
-                            </div>
-                            <div className="info-item">
-                              <FaCalendarAlt />
-                              <span><strong>Applied:</strong> {formatDate(application.createdAt)}</span>
-                            </div>
-                          </div>
-
-                          {application.status === 'pending' && (
-                            <div className="application-actions">
-                              <button 
-                                className="btn btn-success btn-sm me-2"
-                                onClick={() => handleAccept(application._id)}
-                              >
-                                <FaCheck /> Accept
-                              </button>
-                              <button 
-                                className="btn btn-danger btn-sm"
-                                onClick={() => handleReject(application._id)}
-                              >
-                                <FaTimes /> Reject
-                              </button>
-                            </div>
-                          )}
-
-                          {application.responseMessage && (
-                            <div className="application-response">
-                              <strong>Your Response:</strong>
-                              <p>{application.responseMessage}</p>
-                            </div>
+          <div className="ea-stat-card rejected">
+            <FaTimes className="ea-stat-icon" />
+            <div className="ea-stat-info">
+              <div className="ea-stat-number">{stats.rejected || 0}</div>
+              <div className="ea-stat-label">Rejected</div>
+            </div>
+          </div>
+          <div className="ea-stat-card withdrawn">
+            <FaUndo className="ea-stat-icon" />
+            <div className="ea-stat-info">
+              <div className="ea-stat-number">{stats.withdrawn || 0}</div>
+              <div className="ea-stat-label">Withdrawn</div>
+            </div>
+          </div>
+        </div>
+        {/* Event Selector */}
+        <div className="ea-event-selector-row">
+          <label htmlFor="event-select" className="ea-event-label">Select Event:</label>
+          <select
+            id="event-select"
+            className="ea-event-select"
+            value={selectedEvent?._id || ''}
+            onChange={e => {
+              const event = events.find(ev => ev._id === e.target.value);
+              setSelectedEvent(event);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="">-- Choose an event --</option>
+            {events.map(ev => (
+              <option key={ev._id} value={ev._id}>{ev.title}</option>
+            ))}
+          </select>
+        </div>
+        {/* Applications Table/List */}
+        <div className="ea-applications-list">
+          {loading ? (
+            <div className="ea-loading">Loading applications...</div>
+          ) : applications.length === 0 ? (
+            <div className="ea-empty">No applications found for this event.</div>
+          ) : (
+            <table className="ea-table">
+              <thead>
+                <tr>
+                  <th>Applicant</th>
+                  <th>Status</th>
+                  <th>Date Applied</th>
+                  <th>Budget</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {applications.map(app => (
+                  <tr key={app._id} className="ea-table-row">
+                    <td>
+                      <div className="ea-applicant-info">
+                        <div className="ea-applicant-avatar">
+                          {app.talent?.avatar ? (
+                            <img src={app.talent.avatar.startsWith('http') ? app.talent.avatar : `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/${app.talent.avatar}`} alt="avatar" />
+                          ) : (
+                            <FaUser className="ea-applicant-avatar-icon" />
                           )}
                         </div>
+                        <div>
+                          <div className="ea-applicant-name">{app.talent?.firstName} {app.talent?.lastName}</div>
+                          <div className="ea-applicant-email">{app.talent?.email}</div>
+                        </div>
                       </div>
-                    ))}
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                      <div className="pagination-container">
-                        <nav>
-                          <ul className="pagination">
-                            <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                              <button 
-                                className="page-link" 
-                                onClick={() => setCurrentPage(currentPage - 1)}
-                                disabled={currentPage === 1}
-                              >
-                                Previous
-                              </button>
-                            </li>
-                            {[...Array(totalPages)].map((_, index) => (
-                              <li key={index} className={`page-item ${currentPage === index + 1 ? 'active' : ''}`}>
-                                <button 
-                                  className="page-link" 
-                                  onClick={() => setCurrentPage(index + 1)}
-                                >
-                                  {index + 1}
-                                </button>
-                              </li>
-                            ))}
-                            <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                              <button 
-                                className="page-link" 
-                                onClick={() => setCurrentPage(currentPage + 1)}
-                                disabled={currentPage === totalPages}
-                              >
-                                Next
-                              </button>
-                            </li>
-                          </ul>
-                        </nav>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            </>
+                    </td>
+                    <td>
+                      <span className={`ea-status-badge ${app.status}`}>{getStatusIcon(app.status)} {app.status.charAt(0).toUpperCase() + app.status.slice(1)}</span>
+                    </td>
+                    <td>{formatDate(app.createdAt)}</td>
+                    <td>{formatBudget(app.budget)}</td>
+                    <td>
+                      {app.status === 'pending' && (
+                        <div className="ea-action-btns">
+                          <button className="ea-btn accept" onClick={() => handleAccept(app._id)}><FaCheck /> Accept</button>
+                          <button className="ea-btn reject" onClick={() => handleReject(app._id)}><FaTimes /> Reject</button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="ea-pagination">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                className={`ea-page-btn${currentPage === i + 1 ? ' active' : ''}`}
+                onClick={() => setCurrentPage(i + 1)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Response Modal */}

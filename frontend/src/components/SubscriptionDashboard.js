@@ -45,56 +45,40 @@ const SubscriptionDashboard = () => {
     }
   };
 
-  const getTierInfo = (tier) => {
+  const getTierInfo = (tier, leadsPerMonth) => {
     const tiers = {
-      'free-basic': {
-        name: 'Free Basic',
+      'free': {
+        name: 'Free',
         icon: <FaInfoCircle />,
         color: 'text-gray-600',
         bgColor: 'bg-gray-100',
-        features: ['5 leads per month', 'Basic profile', 'Standard matching']
+        features: [
+          (typeof leadsPerMonth === 'number' && leadsPerMonth > 0)
+            ? `${leadsPerMonth} leads per month`
+            : 'Limited leads',
+          'Basic profile',
+          'Standard matching'
+        ]
       },
-      'pro-tier': {
-        name: 'Pro Tier',
+      'pro': {
+        name: 'Pro',
         icon: <FaStar />,
         color: 'text-blue-600',
         bgColor: 'bg-blue-100',
-        features: ['Unlimited leads', 'AI boosted matching', 'Priority listing']
-      },
-      'location-pro': {
-        name: 'Location Pro',
-        icon: <FaMapMarkerAlt />,
-        color: 'text-green-600',
-        bgColor: 'bg-green-100',
-        features: ['Location-based filtering', 'AI boosted matching', 'Priority listing']
-      },
-      'skill-focused': {
-        name: 'Skill Focused',
-        icon: <FaBullseye />,
-        color: 'text-purple-600',
-        bgColor: 'bg-purple-100',
-        features: ['Skill-based filtering', 'Location-based filtering', 'AI boosted matching']
-      },
-      'portfolio-plus': {
-        name: 'Portfolio Plus',
-        icon: <FaImages />,
-        color: 'text-orange-600',
-        bgColor: 'bg-orange-100',
-        features: ['Portfolio gallery', 'Skill-based filtering', 'Location-based filtering']
-      },
-      'agency-plan': {
-        name: 'Agency Plan',
-        icon: <FaUsers />,
-        color: 'text-red-600',
-        bgColor: 'bg-red-100',
-        features: ['Group accounts', 'Portfolio gallery', 'All premium features']
+        features: [
+          'Unlimited leads',
+          'AI boosted matching',
+          'Priority listing',
+          'Portfolio gallery',
+          'Advanced filtering'
+        ]
       }
     };
-    return tiers[tier] || tiers['free-basic'];
+    return tiers[tier] || tiers['free'];
   };
 
   const getUsagePercentage = () => {
-    if (!subscription || subscription.tier !== 'free-basic') return 0;
+    if (!subscription || subscription.tier !== 'free') return 0;
     return Math.min((subscription.usage.leadsUsed / subscription.features.leadsPerMonth) * 100, 100);
   };
 
@@ -122,7 +106,7 @@ const SubscriptionDashboard = () => {
     );
   }
 
-  const tierInfo = getTierInfo(subscription?.tier || 'free-basic');
+  const tierInfo = getTierInfo(subscription?.tier || 'free', subscription?.features?.leadsPerMonth);
 
   return (
     <div className="subscription-dashboard">
@@ -146,7 +130,7 @@ const SubscriptionDashboard = () => {
               <p className="plan-status">
                 Status: <span className="text-green-600 font-semibold">Active</span>
               </p>
-              {subscription?.tier === 'free-basic' && (
+              {subscription?.tier === 'free' && (
                 <div className="usage-info">
                   <div className="usage-text">
                     <span className={getUsageColor()}>
@@ -184,7 +168,7 @@ const SubscriptionDashboard = () => {
             <h3 className="section-title">Upgrade Recommendations</h3>
             <div className="recommendations-grid">
               {recommendations.map((rec, index) => {
-                const recTierInfo = getTierInfo(rec.tier);
+                const recTierInfo = getTierInfo(rec.tier, rec.features?.leadsPerMonth);
                 return (
                   <div key={index} className="recommendation-card">
                     <div className="recommendation-header">
@@ -232,7 +216,7 @@ const SubscriptionDashboard = () => {
                   <p className="stat-label">Leads Used This Month</p>
                 </div>
               </div>
-              {subscription.tier === 'free-basic' && (
+              {subscription.tier === 'free' && (
                 <div className="stat-card">
                   <div className="stat-icon">
                     <FaInfoCircle className="text-blue-500" />

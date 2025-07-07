@@ -146,7 +146,7 @@ const Dashboard = () => {
             <div className="me-4 flex-shrink-0">
               <ProfilePicture
                 userId={user?._id}
-                currentPicture={user?.profilePicture}
+                currentPicture={user?.avatar}
                 size="large"
                 editable={false}
                 user={user}
@@ -212,7 +212,7 @@ const Dashboard = () => {
                     <>
                       <div className="col-md-3 mb-3">
                         <button 
-                          className="dashboard-btn dashboard-btn-primary w-100"
+                          className="dashboard-btn dashboard-btn-warning w-100"
                           onClick={() => navigate('/events')}
                         >
                           <FaSearch />
@@ -221,7 +221,7 @@ const Dashboard = () => {
                       </div>
                       <div className="col-md-3 mb-3">
                         <button 
-                          className="dashboard-btn dashboard-btn-warning w-100"
+                          className="dashboard-btn dashboard-btn-primary w-100"
                           onClick={() => navigate('/my-applications')}
                         >
                           <FaPaperPlane />

@@ -19,13 +19,8 @@ const seedSubscriptions = async () => {
     for (let i = 0; i < talentUsers.length; i++) {
       const user = talentUsers[i];
       
-      // Assign different subscription tiers for testing
-      let tier = 'free-basic';
-      if (i === 0) tier = 'pro-tier';
-      else if (i === 1) tier = 'location-pro';
-      else if (i === 2) tier = 'skill-focused';
-      else if (i === 3) tier = 'portfolio-plus';
-      else if (i === 4) tier = 'agency-plan';
+      // Assign 'pro' to the first user, 'free' to the rest
+      let tier = i === 0 ? 'pro' : 'free';
 
       const subscription = new Subscription({
         user: user._id,
@@ -42,12 +37,8 @@ const seedSubscriptions = async () => {
 
     console.log('✅ Test subscriptions seeded successfully');
     console.log('Subscription tiers created:');
-    console.log('- Free Basic (default for remaining users)');
-    console.log('- Pro Tier (1 user)');
-    console.log('- Location Pro (1 user)');
-    console.log('- Skill Focused (1 user)');
-    console.log('- Portfolio Plus (1 user)');
-    console.log('- Agency Plan (1 user)');
+    console.log('- Pro (1 user)');
+    console.log('- Free (remaining users)');
   } catch (error) {
     console.error('❌ Error seeding subscriptions:', error);
   }

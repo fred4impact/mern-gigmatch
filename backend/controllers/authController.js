@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const Subscription = require('../models/Subscription');
 
 // Generate JWT Token
 const generateToken = (id) => {
@@ -13,7 +14,7 @@ const generateToken = (id) => {
 // @access  Public
 const register = async (req, res) => {
   try {
-    const { email, password, firstName, lastName, role, phone, location } = req.body;
+    const { email, password, firstName, lastName, role, phone, location, category, subcategory } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findByEmail(email);
@@ -29,8 +30,19 @@ const register = async (req, res) => {
       lastName,
       role: role || 'talent',
       phone,
-      location
+      location,
+      category,
+      subcategory
     });
+
+    // Automatically create a free subscription for new talent users
+    if (user && user.role === 'talent') {
+      await Subscription.create({
+        user: user._id,
+        tier: 'free',
+        status: 'active'
+      });
+    }
 
     if (user) {
       // Generate token

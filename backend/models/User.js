@@ -31,7 +31,7 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['talent', 'planner', 'studio', 'admin'],
+    enum: ['talent', 'planner', 'admin'],
     default: 'talent',
     required: true
   },
@@ -90,10 +90,6 @@ const userSchema = new mongoose.Schema({
     maxlength: [200, 'Availability description cannot exceed 200 characters']
   },
   avatar: {
-    type: String,
-    default: ''
-  },
-  profilePicture: {
     type: String,
     default: ''
   },

@@ -1,0 +1,216 @@
+/* Navbar Modern Styles Inspired by Htmlstream */
+.nav-main {
+  background: #fff;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  padding: 0.5rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+}
+.nav-brand-link {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #6366f1;
+  text-decoration: none;
+  letter-spacing: 1px;
+}
+.nav-menu {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+.nav-link {
+  color: #334155;
+  font-size: 1.08rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding: 0.3em 0.7em;
+  border-radius: 1.2em;
+  transition: background 0.18s, color 0.18s;
+}
+.nav-link.active, .nav-link:hover {
+  background: #f1f5f9;
+  color: #6366f1;
+}
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.45em 1.1em;
+  border-radius: 2em;
+  font-size: 1em;
+  font-weight: 500;
+  border: 1.5px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  transition: background 0.18s, color 0.18s, border 0.18s;
+  text-decoration: none;
+}
+.nav-btn-primary {
+  border-color: #6366f1;
+  color: #6366f1;
+}
+.nav-btn-primary:hover {
+  background: #6366f1;
+  color: #fff;
+}
+.nav-btn-secondary {
+  border-color: #64748b;
+  color: #64748b;
+}
+.nav-btn-secondary:hover {
+  background: #64748b;
+  color: #fff;
+}
+.nav-user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.nav-user-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.2em 0.7em 0.2em 0.2em;
+  border-radius: 2em;
+  transition: background 0.18s;
+}
+.nav-user-trigger:hover, .nav-user-trigger:focus {
+  background: #f1f5f9;
+}
+.nav-user-avatar, .nav-dropdown-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #e0e7ff;
+  border: 2px solid #fff;
+  box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+}
+.nav-user-avatar-placeholder, .nav-dropdown-avatar-placeholder {
+  width: 38px;
+  height: 38px;
+  font-size: 2rem;
+  color: #6366f1;
+  background: #e0e7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.nav-user-name {
+  font-weight: 600;
+  color: #334155;
+  font-size: 1.08rem;
+}
+.nav-chevron {
+  font-size: 1.1rem;
+  color: #64748b;
+  margin-left: 0.2em;
+  transition: transform 0.18s;
+}
+.nav-chevron.open {
+  transform: rotate(180deg);
+}
+.nav-dropdown {
+  position: absolute;
+  right: 0;
+  top: 120%;
+  min-width: 240px;
+  background: #fff;
+  border-radius: 1.1em;
+  box-shadow: 0 8px 32px rgba(99,102,241,0.13);
+  padding: 1.1em 0.7em 0.7em 0.7em;
+  z-index: 100;
+  animation: fadeInDropdown 0.18s;
+}
+@keyframes fadeInDropdown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.nav-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8em;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 0.7em;
+  margin-bottom: 0.7em;
+}
+.nav-dropdown-avatar, .nav-dropdown-avatar-placeholder {
+  width: 48px;
+  height: 48px;
+  font-size: 2.2rem;
+  color: #6366f1;
+  background: #e0e7ff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  object-fit: cover;
+}
+.nav-dropdown-userinfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1em;
+}
+.nav-dropdown-name {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 1.08rem;
+}
+.nav-dropdown-email {
+  color: #64748b;
+  font-size: 0.97rem;
+}
+.nav-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.7em 0.7em;
+  color: #334155;
+  font-size: 1.05rem;
+  font-weight: 500;
+  border-radius: 0.8em;
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.18s, color 0.18s;
+  margin-bottom: 0.1em;
+}
+.nav-dropdown-item:hover, .nav-dropdown-item:focus {
+  background: #f1f5f9;
+  color: #6366f1;
+}
+.nav-dropdown-logout {
+  color: #ef4444;
+}
+.nav-dropdown-logout:hover {
+  background: #fee2e2;
+  color: #991b1b;
+}
+@media (max-width: 900px) {
+  .nav-container { padding: 0 0.5rem; }
+  .nav-menu { gap: 0.7rem; }
+}
+@media (max-width: 600px) {
+  .nav-container { flex-direction: column; gap: 0.7rem; align-items: flex-start; }
+  .nav-header { text-align: center; }
+} 

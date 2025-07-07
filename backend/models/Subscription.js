@@ -9,8 +9,8 @@ const SubscriptionSchema = new mongoose.Schema({
   },
   tier: {
     type: String,
-    enum: ['free-basic', 'pro-tier', 'location-pro', 'skill-focused', 'portfolio-plus', 'agency-plan'],
-    default: 'free-basic',
+    enum: ['free', 'pro'],
+    default: 'free',
     required: true
   },
   status: {
@@ -21,9 +21,13 @@ const SubscriptionSchema = new mongoose.Schema({
   features: {
     leadsPerMonth: {
       type: Number,
-      default: 5 // Free basic limit
+      default: 3 // Free limit
     },
     aiBoosted: {
+      type: Boolean,
+      default: false
+    },
+    priorityListing: {
       type: Boolean,
       default: false
     },
@@ -40,10 +44,6 @@ const SubscriptionSchema = new mongoose.Schema({
       default: false
     },
     groupAccounts: {
-      type: Boolean,
-      default: false
-    },
-    priorityListing: {
       type: Boolean,
       default: false
     }
@@ -84,13 +84,12 @@ const SubscriptionSchema = new mongoose.Schema({
 });
 
 // Index for efficient queries
-SubscriptionSchema.index({ user: 1 });
 SubscriptionSchema.index({ tier: 1, status: 1 });
 SubscriptionSchema.index({ 'paymentInfo.stripeCustomerId': 1 });
 
 // Virtual for remaining leads
 SubscriptionSchema.virtual('leadsRemaining').get(function() {
-  if (this.tier === 'free-basic') {
+  if (this.tier === 'free') {
     return Math.max(0, this.features.leadsPerMonth - this.usage.leadsUsed);
   }
   return -1; // Unlimited for paid tiers
@@ -103,7 +102,7 @@ SubscriptionSchema.virtual('isActive').get(function() {
 
 // Method to check if user can apply to more events
 SubscriptionSchema.methods.canApplyToEvent = function() {
-  if (this.tier === 'free-basic') {
+  if (this.tier === 'free') {
     return this.usage.leadsUsed < this.features.leadsPerMonth;
   }
   return true; // Paid tiers have unlimited applications
@@ -111,7 +110,7 @@ SubscriptionSchema.methods.canApplyToEvent = function() {
 
 // Method to increment leads used
 SubscriptionSchema.methods.incrementLeadsUsed = function() {
-  if (this.tier === 'free-basic') {
+  if (this.tier === 'free') {
     this.usage.leadsUsed += 1;
     return this.save();
   }
@@ -135,59 +134,23 @@ SubscriptionSchema.methods.resetMonthlyUsage = function() {
 // Pre-save middleware to set features based on tier
 SubscriptionSchema.pre('save', function(next) {
   const tierFeatures = {
-    'free-basic': {
-      leadsPerMonth: 5,
+    'free': {
+      leadsPerMonth: 3,
       aiBoosted: false,
+      priorityListing: false,
       locationFiltering: false,
       skillFiltering: false,
       portfolioGallery: false,
-      groupAccounts: false,
-      priorityListing: false
+      groupAccounts: false
     },
-    'pro-tier': {
+    'pro': {
       leadsPerMonth: -1, // Unlimited
       aiBoosted: true,
-      locationFiltering: false,
-      skillFiltering: false,
-      portfolioGallery: false,
-      groupAccounts: false,
-      priorityListing: true
-    },
-    'location-pro': {
-      leadsPerMonth: -1,
-      aiBoosted: true,
-      locationFiltering: true,
-      skillFiltering: false,
-      portfolioGallery: false,
-      groupAccounts: false,
-      priorityListing: true
-    },
-    'skill-focused': {
-      leadsPerMonth: -1,
-      aiBoosted: true,
-      locationFiltering: true,
-      skillFiltering: true,
-      portfolioGallery: false,
-      groupAccounts: false,
-      priorityListing: true
-    },
-    'portfolio-plus': {
-      leadsPerMonth: -1,
-      aiBoosted: true,
+      priorityListing: true,
       locationFiltering: true,
       skillFiltering: true,
       portfolioGallery: true,
-      groupAccounts: false,
-      priorityListing: true
-    },
-    'agency-plan': {
-      leadsPerMonth: -1,
-      aiBoosted: true,
-      locationFiltering: true,
-      skillFiltering: true,
-      portfolioGallery: true,
-      groupAccounts: true,
-      priorityListing: true
+      groupAccounts: false
     }
   };
 

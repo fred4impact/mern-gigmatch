@@ -127,8 +127,8 @@ const MyApplications = () => {
   }
 
   return (
-    <div className="moises-profile-root">
-      <div className="moises-profile-card">
+    <div className="my-application">
+      <div className="dashboard-card">
         <div style={{ marginBottom: '1rem' }}>
           <Link to="/dashboard" className="moises-profile-btn moises-profile-btn-secondary">
             &larr; Go Back to Dashboard

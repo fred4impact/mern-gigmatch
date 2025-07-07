@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import eventService from '../services/eventService';
-import { 
-  FaPlus, 
-  FaMapMarkerAlt, 
-  FaCalendarAlt, 
+import {
+  FaPlus,
+  FaMapMarkerAlt,
+  FaCalendarAlt,
   FaDollarSign,
   FaTag,
   FaEye,
@@ -70,7 +70,7 @@ const MyEvents = () => {
   const getStatusColor = (status) => {
     switch (status) {
       case 'open': return 'success';
-      case 'closed': return 'warning';
+      case 'closed': return 'secondary';
       case 'cancelled': return 'danger';
       default: return 'secondary';
     }
@@ -78,11 +78,13 @@ const MyEvents = () => {
 
   if (loading) {
     return (
-      <div className="good-course-profile-root">
-        <div className="good-course-profile-card">
-          <div className="text-center">
-            <div className="good-course-spinner"></div>
-            <p>Loading your events...</p>
+      <div className="container min-vh-100 d-flex align-items-center justify-content-center bg-light">
+        <div className="row w-100 justify-content-center">
+          <div className="col-12 col-md-8 col-lg-5">
+            <div className="card shadow-sm border-0 rounded-4 p-4 text-center">
+              <div className="spinner-border text-primary mb-3" role="status" />
+              <p className="mb-0">Loading your events...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -90,133 +92,130 @@ const MyEvents = () => {
   }
 
   return (
-    <div className="my-events-container" style={{ maxWidth: '1100px', margin: '2rem auto', padding: '2rem 1rem' }}>
-      <div className="my-events-card" style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 4px 24px rgba(0,0,0,0.08)', padding: '2rem' }}>
-        <div style={{ marginBottom: '1rem' }}>
-          <Link to="/dashboard" className="gigmatch-profile-btn gigmatch-profile-btn-secondary">
-            &larr; Go Back to Dashboard
-          </Link>
+    <div className="container py-4">
+      <div className="mb-3">
+        <Link to="/dashboard" className="btn btn-outline-secondary btn-sm">
+          &larr; Go Back to Dashboard
+        </Link>
+      </div>
+      <div className="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <div>
+          <h1 className="h3 fw-bold mb-1">My Events</h1>
+          <div className="text-secondary">Manage your created events and gig opportunities</div>
         </div>
-        <div className="my-events-header" style={{ marginBottom: '2rem' }}>
-          <div className="d-flex justify-content-between align-items-center">
-            <div>
-              <h1 className="my-events-title">My Events</h1>
-              <p className="my-events-subtitle">
-                Manage your created events and gig opportunities
-              </p>
+        <Link to="/create-event" className="btn btn-primary d-flex align-items-center gap-2">
+          <FaPlus /> Create New Event
+        </Link>
+      </div>
+      {/* Stats Row */}
+      <div className="row g-3 mb-4">
+        <div className="col-12 col-md-4">
+          <div className="card border-0 shadow-sm text-center bg-warning bg-opacity-75 text-white">
+            <div className="card-body">
+              <div className="fs-3 fw-bold">{events.length}</div>
+              <div className="">Total Events</div>
             </div>
-            <Link to="/create-event" className="gigmatch-profile-btn gigmatch-profile-btn-primary">
-              <FaPlus /> Create New Event
+          </div>
+        </div>
+        <div className="col-6 col-md-4">
+          <div className="card border-0 shadow-sm text-center bg-success bg-opacity-75 text-white">
+            <div className="card-body">
+              <div className="fs-3 fw-bold">{events.filter(e => e.status === 'open').length}</div>
+              <div className="">Active Events</div>
+            </div>
+          </div>
+        </div>
+        <div className="col-6 col-md-4">
+          <div className="card border-0 shadow-sm text-center bg-primary bg-opacity-75 text-white">
+            <div className="card-body">
+              <div className="fs-3 fw-bold">{events.filter(e => e.status === 'closed').length}</div>
+              <div className="">Completed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      {/* Events List */}
+      <div className="mb-4">
+        <h4 className="fw-semibold mb-3">Your Events ({events.length})</h4>
+        {events.length === 0 ? (
+          <div className="card border-0 shadow-sm text-center p-5">
+            <p className="mb-3">You haven't created any events yet.</p>
+            <Link to="/create-event" className="btn btn-primary d-inline-flex align-items-center gap-2">
+              <FaPlus /> Create Your First Event
             </Link>
           </div>
-        </div>
-        {/* Stats */}
-        <div className="my-events-section" style={{ marginBottom: '2rem' }}>
-          <div className="events-stats">
-            <div className="stat-item">
-              <div className="stat-number">{events.length}</div>
-              <div className="stat-label">Total Events</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">
-                {events.filter(e => e.status === 'open').length}
-              </div>
-              <div className="stat-label">Active Events</div>
-            </div>
-            <div className="stat-item">
-              <div className="stat-number">
-                {events.filter(e => e.status === 'closed').length}
-              </div>
-              <div className="stat-label">Completed</div>
-            </div>
-          </div>
-        </div>
-        {/* Events List */}
-        <div className="my-events-section">
-          <h3 className="my-events-section-title" style={{ marginBottom: '1.5rem' }}>
-            Your Events ({events.length})
-          </h3>
-          {events.length === 0 ? (
-            <div className="text-center py-4">
-              <p>You haven't created any events yet.</p>
-              <Link to="/create-event" className="gigmatch-profile-btn gigmatch-profile-btn-primary">
-                <FaPlus /> Create Your First Event
-              </Link>
-            </div>
-          ) : (
-            <div className="my-events-grid">
-              {events.map((event) => (
-                <div key={event._id} className="event-card">
-                  <div className="event-card-header">
-                    <h4 className="event-card-title">{event.title}</h4>
-                    <span className={`event-status event-status-${event.status}`}>
-                      {event.status}
-                    </span>
-                  </div>
-                  <div className="event-card-body">
+        ) : (
+          <div className="row g-4">
+            {events.map((event) => (
+              <div key={event._id} className="col-12 col-md-6 col-lg-4">
+                <div className="card h-100 border-0 event-hover-shadow">
+                  <div className="card-body d-flex flex-column">
+                    <div className="d-flex justify-content-between align-items-center mb-2">
+                      <h5 className="card-title mb-0">{event.title}</h5>
+                      <span className={`badge bg-${getStatusColor(event.status)} text-capitalize`}>
+                        {event.status}
+                      </span>
+                    </div>
                     {event.description && (
-                      <p className="event-description">
-                        {event.description.length > 120 
-                          ? `${event.description.substring(0, 120)}...` 
-                          : event.description
-                        }
+                      <p className="text-secondary small mb-2">
+                        {event.description.length > 120
+                          ? `${event.description.substring(0, 120)}...`
+                          : event.description}
                       </p>
                     )}
-                    <div className="event-details">
+                    <ul className="list-unstyled mb-2">
                       {event.type && (
-                        <div className="event-detail">
-                          <FaTag className="event-detail-icon" />
+                        <li className="mb-1 d-flex align-items-center gap-2">
+                          <FaTag className="text-muted" />
                           <span>{event.type}</span>
-                        </div>
+                        </li>
                       )}
                       {event.location?.city && (
-                        <div className="event-detail">
-                          <FaMapMarkerAlt className="event-detail-icon" />
+                        <li className="mb-1 d-flex align-items-center gap-2">
+                          <FaMapMarkerAlt className="text-muted" />
                           <span>{event.location.city}, {event.location.state}</span>
-                        </div>
+                        </li>
                       )}
                       {event.date && (
-                        <div className="event-detail">
-                          <FaCalendarAlt className="event-detail-icon" />
+                        <li className="mb-1 d-flex align-items-center gap-2">
+                          <FaCalendarAlt className="text-muted" />
                           <span>{formatDate(event.date)}</span>
-                        </div>
+                        </li>
                       )}
                       {event.budget && (
-                        <div className="event-detail">
-                          <FaDollarSign className="event-detail-icon" />
+                        <li className="mb-1 d-flex align-items-center gap-2">
+                          <FaDollarSign className="text-muted" />
                           <span>{formatBudget(event.budget)}</span>
-                        </div>
+                        </li>
                       )}
-                    </div>
-                    <div className="event-meta">
-                      <small>Created: {formatDate(event.createdAt)}</small>
-                    </div>
-                    <div className="event-actions" style={{ marginTop: '1rem' }}>
-                      <Link 
+                    </ul>
+                    <div className="text-muted small mb-2">Created: {formatDate(event.createdAt)}</div>
+                    <div className="mt-auto d-flex gap-2 flex-wrap">
+                      <Link
                         to={`/events/${event._id}`}
-                        className="gigmatch-profile-btn gigmatch-profile-btn-primary"
+                        className="btn btn-outline-primary btn-sm d-flex align-items-center gap-1"
                       >
                         <FaEye /> View
                       </Link>
-                      <Link 
-                        to={`/events/${event._id}/edit`}
-                        className="gigmatch-profile-btn gigmatch-profile-btn-info"
+                      <Link
+                        to={`/events/edit/${event._id}`}
+                        className="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1"
                       >
                         <FaEdit /> Edit
                       </Link>
                       <button
+                        className="btn btn-outline-danger btn-sm d-flex align-items-center gap-1"
                         onClick={() => handleDelete(event._id)}
-                        className="gigmatch-profile-btn gigmatch-profile-btn-danger"
                       >
                         <FaTrash /> Delete
                       </button>
                     </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
