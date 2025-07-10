@@ -1,13 +1,15 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+// Use relative URL for proxy support
+const API_URL = '/api';
 
 // Create axios instance
 const api = axios.create({
   baseURL: API_URL,
   headers: {
     'Content-Type': 'application/json'
-  }
+  },
+  withCredentials: true // Ensure cookies/credentials are sent
 });
 
 // Request interceptor to add auth token

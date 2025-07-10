@@ -208,6 +208,35 @@ const Register = () => {
                 </div>
               </div>
               <div className="mb-3">
+                <label htmlFor="register-category" className="form-label">Category</label>
+                <select
+                  id="register-category"
+                  className={`form-select${errors.category ? ' is-invalid' : ''}`}
+                  {...register('category', { required: 'Please select a category.' })}
+                >
+                  <option value="">Select category</option>
+                  {Object.entries(categories).map(([key, cat]) => (
+                    <option key={key} value={key}>{cat.name}</option>
+                  ))}
+                </select>
+                {errors.category && <div className="invalid-feedback d-block">{errors.category.message}</div>}
+              </div>
+              <div className="mb-3">
+                <label htmlFor="register-subcategory" className="form-label">Subcategory</label>
+                <select
+                  id="register-subcategory"
+                  className={`form-select${errors.subcategory ? ' is-invalid' : ''}`}
+                  {...register('subcategory', { required: 'Please select a subcategory.' })}
+                  disabled={!watch('category')}
+                >
+                  <option value="">Select subcategory</option>
+                  {watch('category') && categories[watch('category')]?.subcategories.map(sub => (
+                    <option key={sub} value={sub}>{sub}</option>
+                  ))}
+                </select>
+                {errors.subcategory && <div className="invalid-feedback d-block">{errors.subcategory.message}</div>}
+              </div>
+              <div className="mb-3">
                 <label htmlFor="register-email" className="form-label">Email</label>
                 <div className="input-group">
                   <span className="input-group-text"><FaEnvelope /></span>

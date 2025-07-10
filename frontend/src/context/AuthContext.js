@@ -139,35 +139,40 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
-      
+
       const response = await authService.login(email, password);
       const { data } = response.data;
-      
+
+      if (!data || !data.token) {
+        throw new Error('Invalid login response from server');
+      }
+
       localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.data));
-      
+      localStorage.setItem('user', JSON.stringify(data));
+
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: { user: data.data, token: data.token }
+        payload: { user: data, token: data.token }
       });
-      
+
       toast.success('Login successful!');
-      
+
       // Redirect based on role
-      if (data.data.role === 'admin') {
+      if (data.role === 'admin') {
         navigate('/admin', { replace: true });
       } else {
         navigate('/dashboard', { replace: true });
       }
-      
+
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || 'Login failed';
+      console.error('Login error details:', error, error.response);
+      const message = error.response?.data?.message || error.message || 'Login failed';
       dispatch({
         type: AUTH_ACTIONS.LOGIN_FAILURE,
         payload: message
       });
-      
+
       toast.error(message);
       return { success: false, error: message };
     }
@@ -201,6 +206,8 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, error: message };
     }
+
+    
   };
 
   // Logout function

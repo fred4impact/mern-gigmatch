@@ -5,7 +5,9 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
+
 const app = express();
+app.set('trust proxy', 1); // Trust first proxy for correct client IP handling
 
 // Security middleware
 app.use(helmet());
@@ -14,10 +16,13 @@ app.use(cors({
   credentials: true
 }));
 
+
+
 // Rate limiting
+const isDev = process.env.NODE_ENV !== 'production';
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: isDev ? 1000 : 100 // much higher limit in development
 });
 app.use('/api/', limiter);
 

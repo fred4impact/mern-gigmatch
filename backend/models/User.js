@@ -50,30 +50,12 @@ const userSchema = new mongoose.Schema({
       ],
       message: 'Please select a valid category'
     },
-    required: function() { return this.role === 'talent'; },
-    validate: {
-      validator: function(v) {
-        if (this.role === 'talent') {
-          return v && v !== '' && v !== null;
-        }
-        return true;
-      },
-      message: 'Category is required for talent users'
-    }
+    // No required or custom validator for signup
   },
   subcategory: {
     type: String,
     trim: true,
-    required: function() { return this.role === 'talent'; },
-    validate: {
-      validator: function(v) {
-        if (this.role === 'talent') {
-          return v && v !== '' && v !== null;
-        }
-        return true;
-      },
-      message: 'Subcategory is required for talent users'
-    }
+    // No required or custom validator for signup
   },
   bio: {
     type: String,
@@ -287,7 +269,7 @@ userSchema.methods.updateLastLogin = function() {
 
 // Static method to find by email
 userSchema.statics.findByEmail = function(email) {
-  return this.findOne({ email: email.toLowerCase() });
+  return this.findOne({ email: email.toLowerCase(), deleted: false });
 };
 
 module.exports = mongoose.model('User', userSchema); 

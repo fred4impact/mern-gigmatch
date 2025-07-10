@@ -1,0 +1,57 @@
+# ArgoCD Application for Backend (Helm)
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gigmatch-backend
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/your-username/your-repo.git'  # <-- Set your repo URL
+    targetRevision: HEAD
+    path: gigmatch-backend  # <-- Path to your Helm chart in the repo
+    helm:
+      valueFiles:
+        - values.yaml
+      parameters:
+        - name: image.tag
+          value: latest  # <-- Set your image tag
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+
+---
+# (Optional) ArgoCD Application for Frontend (Helm)
+# Uncomment and customize if you have a frontend Helm chart
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: gigmatch-frontend
+#   namespace: argocd
+# spec:
+#   project: default
+#   source:
+#     repoURL: 'https://github.com/your-username/your-repo.git'  # <-- Set your repo URL
+#     targetRevision: HEAD
+#     path: gigmatch-frontend  # <-- Path to your frontend Helm chart
+#     helm:
+#       valueFiles:
+#         - values.yaml
+#       parameters:
+#         - name: image.tag
+#           value: latest
+#   destination:
+#     server: 'https://kubernetes.default.svc'
+#     namespace: default
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
+#     syncOptions:
+#       - CreateNamespace=true 
