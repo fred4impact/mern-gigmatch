@@ -1,10 +1,11 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Spinner } from 'react-bootstrap';
 
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -14,6 +15,16 @@ const ProtectedRoute = ({ children }) => {
         </Spinner>
       </div>
     );
+  }
+
+  // If admin tries to access any non-admin route (except home), redirect to /admin
+  if (
+    user &&
+    user.role === 'admin' &&
+    !location.pathname.startsWith('/admin') &&
+    location.pathname !== '/'
+  ) {
+    return <Navigate to="/admin" replace />;
   }
 
   if (!isAuthenticated) {

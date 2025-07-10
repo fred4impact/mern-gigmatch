@@ -27,4 +27,9 @@ router.put('/applications/:applicationId/read', protect, applicationController.m
 // Get application statistics
 router.get('/applications/stats', protect, applicationController.getApplicationStats);
 
+// RESTful routes for test compatibility
+router.post('/', protect, applicationController.applyToEvent);
+router.get('/:id', protect, applicationController.getApplicationById);
+router.patch('/:id/withdraw', protect, applicationController.withdrawApplication);
+
 module.exports = router; 

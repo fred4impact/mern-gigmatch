@@ -55,11 +55,11 @@ const uploadProfilePicture = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    console.log('Current user profile picture:', user.profilePicture);
+    console.log('Current user avatar:', user.avatar);
 
-    // Delete old profile picture if exists
-    if (user.profilePicture && user.profilePicture !== '') {
-      const oldPicturePath = path.join(__dirname, '..', user.profilePicture);
+    // Delete old avatar if exists
+    if (user.avatar && user.avatar !== '') {
+      const oldPicturePath = path.join(__dirname, '..', user.avatar);
       console.log('Old picture path:', oldPicturePath);
       if (fs.existsSync(oldPicturePath)) {
         fs.unlinkSync(oldPicturePath);
@@ -67,24 +67,24 @@ const uploadProfilePicture = async (req, res) => {
       }
     }
 
-    // Update user with new profile picture path
-    const profilePicturePath = req.file.path.replace(/\\/g, '/'); // Normalize path for cross-platform
-    console.log('New picture path:', profilePicturePath);
-    user.profilePicture = profilePicturePath;
+    // Update user with new avatar path
+    const avatarPath = req.file.path.replace(/\\/g, '/'); // Normalize path for cross-platform
+    console.log('New picture path:', avatarPath);
+    user.avatar = avatarPath;
     await user.save();
 
-    console.log('User saved with new profile picture');
+    console.log('User saved with new avatar');
 
     res.json({
       success: true,
-      message: 'Profile picture uploaded successfully',
+      message: 'Avatar uploaded successfully',
       data: {
-        profilePicture: `/api/profile/picture/${userId}`
+        avatar: avatarPath
       }
     });
   } catch (error) {
     console.error('Upload profile picture error:', error);
-    res.status(500).json({ message: 'Error uploading profile picture' });
+    res.status(500).json({ message: 'Error uploading avatar' });
   }
 };
 
@@ -96,27 +96,27 @@ const getProfilePicture = async (req, res) => {
     
     const user = await User.findById(userId);
     console.log('User found:', user ? 'yes' : 'no');
-    console.log('User profile picture:', user?.profilePicture);
+    console.log('User avatar:', user?.avatar);
 
-    if (!user || !user.profilePicture) {
-      console.log('No user or profile picture found');
-      return res.status(404).json({ message: 'Profile picture not found' });
+    if (!user || !user.avatar) {
+      console.log('No user or avatar found');
+      return res.status(404).json({ message: 'Avatar not found' });
     }
 
-    const picturePath = path.join(__dirname, '..', user.profilePicture);
+    const picturePath = path.join(__dirname, '..', user.avatar);
     console.log('Picture path:', picturePath);
     console.log('File exists:', fs.existsSync(picturePath));
     
     if (!fs.existsSync(picturePath)) {
-      console.log('Profile picture file not found');
-      return res.status(404).json({ message: 'Profile picture file not found' });
+      console.log('Avatar file not found');
+      return res.status(404).json({ message: 'Avatar file not found' });
     }
 
-    console.log('Sending profile picture file');
+    console.log('Sending avatar file');
     res.sendFile(picturePath);
   } catch (error) {
     console.error('Get profile picture error:', error);
-    res.status(500).json({ message: 'Error retrieving profile picture' });
+    res.status(500).json({ message: 'Error retrieving avatar' });
   }
 };
 
@@ -130,27 +130,27 @@ const deleteProfilePicture = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    if (!user.profilePicture) {
-      return res.status(404).json({ message: 'No profile picture to delete' });
+    if (!user.avatar) {
+      return res.status(404).json({ message: 'No avatar to delete' });
     }
 
     // Delete file from filesystem
-    const picturePath = path.join(__dirname, '..', user.profilePicture);
+    const picturePath = path.join(__dirname, '..', user.avatar);
     if (fs.existsSync(picturePath)) {
       fs.unlinkSync(picturePath);
     }
 
     // Remove reference from user document
-    user.profilePicture = '';
+    user.avatar = '';
     await user.save();
 
     res.json({
       success: true,
-      message: 'Profile picture deleted successfully'
+      message: 'Avatar deleted successfully'
     });
   } catch (error) {
     console.error('Delete profile picture error:', error);
-    res.status(500).json({ message: 'Error deleting profile picture' });
+    res.status(500).json({ message: 'Error deleting avatar' });
   }
 };
 
@@ -164,10 +164,10 @@ const getUserProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Add profile picture URL if exists
+    // Add avatar URL if exists
     const profileData = user.toObject();
-    if (user.profilePicture) {
-      profileData.profilePictureUrl = `/api/profile/picture/${user._id}`;
+    if (user.avatar) {
+      profileData.avatarUrl = `/api/profile/picture/${user._id}`;
     }
 
     res.json({

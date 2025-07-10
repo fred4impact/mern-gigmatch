@@ -11,11 +11,29 @@ const seedUsers = async () => {
       {
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john@example.com',
+        email: 'james@example.com',
         password: 'password123',
         role: 'talent',
         category: 'musician',
         subcategory: 'Guitarist',
+        phone: '+1234567890',
+        location: {
+          city: 'New York',
+          state: 'NY',
+          country: 'United States'
+        },
+        bio: 'Professional guitarist with 10+ years of experience in live performances and studio recordings.',
+        skills: ['Acoustic Guitar', 'Electric Guitar', 'Fingerstyle', 'Jazz'],
+        availability: 'Weekends and evenings available'
+      },
+      {
+        firstName: 'sam',
+        lastName: 'Doe',
+        email: 'sam@example.com',
+        password: 'password123',
+        role: 'talent',
+        category: 'musician',
+        subcategory: 'Singer',
         phone: '+1234567890',
         location: {
           city: 'New York',
@@ -49,7 +67,7 @@ const seedUsers = async () => {
         lastName: 'Johnson',
         email: 'mike@example.com',
         password: 'password123',
-        role: 'studio',
+        role: 'planner',
         phone: '+1234567892',
         location: {
           city: 'Chicago',
@@ -57,7 +75,7 @@ const seedUsers = async () => {
           country: 'United States'
         },
         organization: {
-          name: 'Creative Studios',
+          name: 'Event Space',
           website: 'https://creativestudios.com',
           description: 'Full-service recording studio and production company.'
         }

@@ -208,40 +208,14 @@ const getSubscriptionRecommendations = async (req, res) => {
     // Calculate recommendations based on usage patterns
     const recommendations = [];
 
-    if (!subscription || subscription.tier === 'free-basic') {
+    if (!subscription || subscription.tier === 'free') {
       if (totalApplications >= 3) {
         recommendations.push({
-          tier: 'pro-tier',
+          tier: 'pro',
           reason: 'You\'re actively applying to events. Upgrade to Pro for unlimited applications and AI-boosted matching.',
-          benefits: ['Unlimited applications', 'AI-boosted matching', 'Priority listing']
+          benefits: ['Unlimited applications', 'AI-boosted matching', 'Priority listing', 'Portfolio gallery', 'Advanced filtering']
         });
       }
-
-      if (req.user.location.coordinates) {
-        recommendations.push({
-          tier: 'location-pro',
-          reason: 'You have location data. Upgrade to Location Pro for smart location-based matching.',
-          benefits: ['Location-based filtering', 'AI-boosted matching', 'Priority listing']
-        });
-      }
-    }
-
-    if (subscription && ['free-basic', 'pro-tier', 'location-pro'].includes(subscription.tier)) {
-      if (req.user.skills && req.user.skills.length > 3) {
-        recommendations.push({
-          tier: 'skill-focused',
-          reason: 'You have diverse skills. Upgrade to Skill Focused for targeted job matching.',
-          benefits: ['Skill-based filtering', 'Location-based filtering', 'AI-boosted matching']
-        });
-      }
-    }
-
-    if (subscription && subscription.tier !== 'portfolio-plus' && subscription.tier !== 'agency-plan') {
-      recommendations.push({
-        tier: 'portfolio-plus',
-        reason: 'Showcase your work with Portfolio Plus for better visibility.',
-        benefits: ['Portfolio gallery', 'Skill-based filtering', 'Location-based filtering']
-      });
     }
 
     res.json({

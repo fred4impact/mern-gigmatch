@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  mongo:
+    image: mongo:6
+    container_name: gigmatch-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: ./backend
+    container_name: gigmatch-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/gigmatch
+      - NODE_ENV=production
+    depends_on:
+      - mongo
+    working_dir: /usr/src/app
+
+  frontend:
+    build: ./frontend
+    container_name: gigmatch-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:

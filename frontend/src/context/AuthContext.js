@@ -116,9 +116,15 @@ export const AuthProvider = ({ children }) => {
               token
             }
           });
+          localStorage.setItem('user', JSON.stringify(response.data.data));
+          // Redirect if admin
+          if (response.data.data.role === 'admin' && window.location.pathname !== '/admin') {
+            navigate('/admin', { replace: true });
+          }
         } catch (error) {
           console.error('Auth check failed:', error);
           localStorage.removeItem('token');
+          localStorage.removeItem('user');
           dispatch({ type: AUTH_ACTIONS.LOGOUT });
         }
       } else {
@@ -127,33 +133,46 @@ export const AuthProvider = ({ children }) => {
     };
 
     checkAuth();
-  }, []);
+  }, [navigate]);
 
   // Login function
   const login = async (email, password) => {
     try {
       dispatch({ type: AUTH_ACTIONS.LOGIN_START });
-      
+
       const response = await authService.login(email, password);
       const { data } = response.data;
-      
+
+      if (!data || !data.token) {
+        throw new Error('Invalid login response from server');
+      }
+
       localStorage.setItem('token', data.token);
-      
+      localStorage.setItem('user', JSON.stringify(data));
+
       dispatch({
         type: AUTH_ACTIONS.LOGIN_SUCCESS,
-        payload: { user: data.data, token: data.token }
+        payload: { user: data, token: data.token }
       });
-      
+
       toast.success('Login successful!');
-      
+
+      // Redirect based on role
+      if (data.role === 'admin') {
+        navigate('/admin', { replace: true });
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
+
       return { success: true };
     } catch (error) {
-      const message = error.response?.data?.message || 'Login failed';
+      console.error('Login error details:', error, error.response);
+      const message = error.response?.data?.message || error.message || 'Login failed';
       dispatch({
         type: AUTH_ACTIONS.LOGIN_FAILURE,
         payload: message
       });
-      
+
       toast.error(message);
       return { success: false, error: message };
     }
@@ -187,6 +206,8 @@ export const AuthProvider = ({ children }) => {
       toast.error(message);
       return { success: false, error: message };
     }
+
+    
   };
 
   // Logout function
@@ -197,6 +218,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       dispatch({ type: AUTH_ACTIONS.LOGOUT });
       toast.success('Logged out successfully');
       navigate('/');

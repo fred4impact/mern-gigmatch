@@ -127,8 +127,8 @@ const MyApplications = () => {
   }
 
   return (
-    <div className="moises-profile-root">
-      <div className="moises-profile-card">
+    <div className="my-application">
+      <div className="dashboard-card">
         <div style={{ marginBottom: '1rem' }}>
           <Link to="/dashboard" className="moises-profile-btn moises-profile-btn-secondary">
             &larr; Go Back to Dashboard
@@ -224,72 +224,89 @@ const MyApplications = () => {
               </Link>
             </div>
           ) : (
-            <div className="applications-grid">
+            <div className="applications-grid" style={{ display: 'flex', flexWrap: 'wrap', gap: '2rem' }}>
               {applications.map((application) => (
-                <div key={application._id} className="application-card">
-                  <div className="application-card-header">
-                    <div className="application-status">
+                <div
+                  key={application._id}
+                  className="application-card modern-app-card"
+                  style={{
+                    background: '#fff',
+                    border: '1px solid #e5e7eb',
+                    borderRadius: '1rem',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                    padding: '2rem',
+                    minWidth: '320px',
+                    maxWidth: '420px',
+                    flex: '1 1 340px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    transition: 'box-shadow 0.2s',
+                    marginBottom: '1.5rem',
+                  }}
+                  onMouseOver={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)'}
+                  onMouseOut={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'}
+                >
+                  <div className="application-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                    <div className="application-status" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       {getStatusIcon(application.status)}
                       <span 
                         className="application-status-text"
-                        style={{ color: getStatusColor(application.status) }}
+                        style={{ color: getStatusColor(application.status), fontWeight: 600 }}
                       >
                         {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
                       </span>
                     </div>
-                    <div className="application-date">
+                    <div className="application-date" style={{ fontSize: '0.95rem', color: '#6b7280' }}>
                       Applied {formatDate(application.createdAt)}
                     </div>
                   </div>
 
-                  <div className="application-card-body">
-                    <h3 className="application-event-title">
+                  <div className="application-card-body" style={{ marginBottom: '1rem' }}>
+                    <h3 className="application-event-title" style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem' }}>
                       {application.event.title}
                     </h3>
-                    
-                    <div className="application-event-details">
-                      <div className="application-event-detail">
+                    <div className="application-event-details" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                      <div className="application-event-detail" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#6b7280', fontSize: '0.98rem' }}>
                         <FaCalendarAlt />
                         <span>{formatDate(application.event.date)}</span>
                       </div>
-                      <div className="application-event-detail">
+                      <div className="application-event-detail" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#6b7280', fontSize: '0.98rem' }}>
                         <FaMapMarkerAlt />
                         <span>
                           {application.event.location.city}
                           {application.event.location.state && `, ${application.event.location.state}`}
                         </span>
                       </div>
-                      <div className="application-event-detail">
+                      <div className="application-event-detail" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', color: '#6b7280', fontSize: '0.98rem' }}>
                         <FaDollarSign />
                         <span>{formatBudget(application.event.budget)}</span>
                       </div>
                     </div>
-
                     {application.message && (
-                      <div className="application-message">
+                      <div className="application-message" style={{ background: '#f9fafb', borderRadius: '0.5rem', padding: '0.75rem', marginTop: '0.5rem', fontSize: '0.97rem' }}>
                         <strong>Your Message:</strong>
-                        <p>{application.message}</p>
+                        <p style={{ margin: 0 }}>{application.message}</p>
                       </div>
                     )}
-
                     {application.proposedRate && (
-                      <div className="application-rate">
+                      <div className="application-rate" style={{ marginTop: '0.5rem', fontSize: '0.97rem' }}>
                         <strong>Proposed Rate:</strong> ${application.proposedRate.toLocaleString()}
                       </div>
                     )}
-
                     {application.responseMessage && (
-                      <div className="application-response">
+                      <div className="application-response" style={{ background: '#f1f5f9', borderRadius: '0.5rem', padding: '0.75rem', marginTop: '0.5rem', fontSize: '0.97rem' }}>
                         <strong>Response:</strong>
-                        <p>{application.responseMessage}</p>
+                        <p style={{ margin: 0 }}>{application.responseMessage}</p>
                       </div>
                     )}
                   </div>
 
-                  <div className="application-card-footer">
+                  <div className="application-card-footer" style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: 'auto' }}>
                     <Link 
                       to={`/events/${application.event._id}`}
                       className="application-btn application-btn-secondary"
+                      style={{ padding: '0.5rem 1.2rem', borderRadius: '0.5rem', border: '1px solid #e5e7eb', background: '#f3f4f6', color: '#374151', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'background 0.2s' }}
                     >
                       <FaEye /> View Event
                     </Link>
@@ -297,6 +314,7 @@ const MyApplications = () => {
                       <button
                         onClick={() => handleWithdraw(application._id)}
                         className="application-btn application-btn-danger"
+                        style={{ padding: '0.5rem 1.2rem', borderRadius: '0.5rem', border: '1px solid #ef4444', background: '#fff1f2', color: '#b91c1c', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'background 0.2s' }}
                       >
                         <FaTrash /> Withdraw
                       </button>

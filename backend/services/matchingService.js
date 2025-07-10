@@ -284,9 +284,9 @@ class MatchingService {
     const subscription = talent.subscription;
     let boost = 0;
     
-    // Pro tier and above get AI boost
-    if (subscription.tier !== 'free-basic' && subscription.features.aiBoosted) {
-      boost += 0.1; // 10% boost for paid tiers
+    // Only 'pro' tier gets AI boost
+    if (subscription.tier === 'pro' && subscription.features.aiBoosted) {
+      boost += 0.1; // 10% boost for pro
     }
     
     // Priority listing boost
