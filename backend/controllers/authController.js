@@ -35,8 +35,8 @@ const register = async (req, res) => {
       subcategory
     });
 
-    // Automatically create a free subscription for new talent users
-    if (user && user.role === 'talent') {
+    // Automatically create a free subscription for every new user
+    if (user) {
       await Subscription.create({
         user: user._id,
         tier: 'free',

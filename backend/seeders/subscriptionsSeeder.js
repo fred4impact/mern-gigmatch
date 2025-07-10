@@ -13,15 +13,11 @@ const seedSubscriptions = async () => {
       return;
     }
 
-    // Create subscriptions for talent users
-    const talentUsers = users.filter(user => user.role === 'talent');
-    
-    for (let i = 0; i < talentUsers.length; i++) {
-      const user = talentUsers[i];
-      
-      // Assign 'pro' to the first user, 'free' to the rest
+    // Create subscriptions for all users
+    for (let i = 0; i < users.length; i++) {
+      const user = users[i];
+      // Assign 'pro' to the first user, 'free' to the rest (for testing)
       let tier = i === 0 ? 'pro' : 'free';
-
       const subscription = new Subscription({
         user: user._id,
         tier: tier,
@@ -31,7 +27,6 @@ const seedSubscriptions = async () => {
           lastResetDate: new Date()
         }
       });
-
       await subscription.save();
     }
 
