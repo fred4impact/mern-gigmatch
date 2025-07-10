@@ -106,7 +106,7 @@ const Login = () => {
                   <label className="form-check-label" htmlFor="remember-me"> Remember me</label>
                 </div>
                 <div>
-                  <a href="#" className="link-primary small">Forgot Password?</a>
+                  <Link to="/forgot-password" className="link-primary small">Forgot Password?</Link>
                 </div>
               </div>
               <button
