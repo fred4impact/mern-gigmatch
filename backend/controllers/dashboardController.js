@@ -227,9 +227,66 @@ const getProfileCompletion = async (req, res) => {
   }
 };
 
+// Get public platform stats for homepage
+const getPublicStats = async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // User counts
+    const [talentCount, plannerCount, eventCount, applicationCount, bookingCount, newUserCount, newEventCount] = await Promise.all([
+      User.countDocuments({ role: 'talent' }),
+      User.countDocuments({ role: 'planner' }),
+      Event.countDocuments(),
+      Application.countDocuments(),
+      Application.countDocuments({ status: 'accepted' }),
+      User.countDocuments({ createdAt: { $gte: startOfMonth } }),
+      Event.countDocuments({ createdAt: { $gte: startOfMonth } })
+    ]);
+
+    // Unique cities/countries
+    const userLocations = await User.aggregate([
+      { $match: { location: { $exists: true } } },
+      { $group: { _id: { city: '$location.city', country: '$location.country' } } }
+    ]);
+    const uniqueCities = new Set(userLocations.map(loc => loc._id.city).filter(Boolean));
+    const uniqueCountries = new Set(userLocations.map(loc => loc._id.country).filter(Boolean));
+
+    // Average rating (if reviews implemented)
+    let averageRating = null;
+    try {
+      const Review = require('../models/Review');
+      const result = await Review.aggregate([
+        { $group: { _id: null, avg: { $avg: '$rating' } } }
+      ]);
+      averageRating = result[0]?.avg || null;
+    } catch (e) {
+      // Review model or ratings may not exist
+      averageRating = null;
+    }
+
+    res.json({
+      talents: talentCount,
+      planners: plannerCount,
+      events: eventCount,
+      applications: applicationCount,
+      bookings: bookingCount,
+      averageRating,
+      cities: uniqueCities.size,
+      countries: uniqueCountries.size,
+      newUsersThisMonth: newUserCount,
+      newEventsThisMonth: newEventCount
+    });
+  } catch (error) {
+    console.error('Get public stats error:', error);
+    res.status(500).json({ message: 'Error fetching public stats' });
+  }
+};
+
 module.exports = {
   getTalentStats,
   getPlannerStats,
   getRecentActivity,
-  getProfileCompletion
+  getProfileCompletion,
+  getPublicStats
 }; 

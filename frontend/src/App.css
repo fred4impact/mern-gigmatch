@@ -4395,3 +4395,40 @@ footer, .footer {
   font-weight: 600;
   margin-left: 0.2em;
 }
+
+/* Application Card Status Colors */
+.application-card-status-accepted {
+  border: 2px solid #10b981 !important;
+  border-left: 4px solid #10b981 !important;
+}
+
+.application-card-status-accepted:hover {
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.15) !important;
+}
+
+.application-card-status-pending {
+  border: 2px solid #f59e0b !important;
+  border-left: 4px solid #f59e0b !important;
+}
+
+.application-card-status-pending:hover {
+  box-shadow: 0 4px 16px rgba(245, 158, 11, 0.15) !important;
+}
+
+.application-card-status-rejected {
+  border: 2px solid #ef4444 !important;
+  border-left: 4px solid #ef4444 !important;
+}
+
+.application-card-status-rejected:hover {
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15) !important;
+}
+
+.application-card-status-withdrawn {
+  border: 2px solid #6b7280 !important;
+  border-left: 4px solid #6b7280 !important;
+}
+
+.application-card-status-withdrawn:hover {
+  box-shadow: 0 4px 16px rgba(107, 114, 128, 0.15) !important;
+}

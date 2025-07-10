@@ -1,6 +1,7 @@
 const Application = require('../models/Application');
 const Event = require('../models/Event');
 const User = require('../models/User');
+const Review = require('../models/Review');
 
 // Apply to an event
 const applyToEvent = async (req, res) => {
@@ -393,6 +394,72 @@ const getApplicationById = async (req, res) => {
   }
 };
 
+// Leave a review for a completed application/booking
+const leaveReviewForApplication = async (req, res) => {
+  try {
+    const { applicationId } = req.params;
+    const { rating, comment, categories } = req.body;
+    const userId = req.user.id;
+
+    // Find the application
+    const application = await Application.findById(applicationId).populate('event talent');
+    if (!application) {
+      return res.status(404).json({ message: 'Application not found' });
+    }
+
+    // Only allow if application is accepted and event date is in the past (completed)
+    if (application.status !== 'accepted') {
+      return res.status(400).json({ message: 'You can only review completed bookings.' });
+    }
+    // Optionally, check event date is in the past
+    if (application.event && application.event.date && new Date(application.event.date) > new Date()) {
+      return res.status(400).json({ message: 'You can only review after the event date.' });
+    }
+
+    // Only involved users can review
+    const isTalent = application.talent._id.toString() === userId;
+    const isPlanner = application.event.createdBy.toString() === userId;
+    if (!isTalent && !isPlanner) {
+      return res.status(403).json({ message: 'You are not authorized to review this booking.' });
+    }
+
+    // Determine reviewer and reviewedUser
+    let reviewedUser;
+    if (isTalent) {
+      reviewedUser = application.event.createdBy;
+    } else {
+      reviewedUser = application.talent._id;
+    }
+
+    // Prevent duplicate reviews
+    const existingReview = await Review.findOne({
+      reviewer: userId,
+      reviewedUser,
+      event: application.event._id,
+      application: application._id
+    });
+    if (existingReview) {
+      return res.status(400).json({ message: 'You have already reviewed this booking.' });
+    }
+
+    // Create review
+    const review = new Review({
+      reviewer: userId,
+      reviewedUser,
+      event: application.event._id,
+      application: application._id,
+      rating,
+      comment,
+      categories
+    });
+    await review.save();
+    res.status(201).json({ success: true, message: 'Review submitted successfully', data: review });
+  } catch (error) {
+    console.error('Leave review error:', error);
+    res.status(500).json({ message: 'Error submitting review' });
+  }
+};
+
 module.exports = {
   applyToEvent,
   getMyApplications,
@@ -402,5 +469,6 @@ module.exports = {
   withdrawApplication,
   markAsRead,
   getApplicationStats,
-  getApplicationById
+  getApplicationById,
+  leaveReviewForApplication
 }; 

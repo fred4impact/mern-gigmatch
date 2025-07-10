@@ -16,6 +16,8 @@ import {
   FaTrash
 } from 'react-icons/fa';
 import toast from 'react-hot-toast';
+import ReviewForm from '../components/ReviewForm';
+import reviewService from '../services/reviewService';
 
 const MyApplications = () => {
   const { user } = useAuth();
@@ -26,6 +28,8 @@ const MyApplications = () => {
   const [selectedStatus, setSelectedStatus] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [reviewingApp, setReviewingApp] = useState(null);
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     if (user?.role !== 'talent') {
@@ -120,6 +124,32 @@ const MyApplications = () => {
   const formatBudget = (budget) => {
     if (!budget) return 'Not specified';
     return `$${budget.toLocaleString()}`;
+  };
+
+  // Helper: check if event is in the past
+  const isEventPast = (event) => {
+    if (!event?.date) return false;
+    return new Date(event.date) < new Date();
+  };
+
+  // Helper: check if review already left (for now, assume not; can be improved if reviews are fetched)
+  const canLeaveReview = (app) => {
+    return app.status === 'accepted' && isEventPast(app.event);
+  };
+
+  const handleReviewSubmit = async (reviewData) => {
+    if (!reviewingApp) return;
+    setSubmittingReview(true);
+    try {
+      await reviewService.submitApplicationReview(reviewingApp._id, reviewData);
+      toast.success('Review submitted!');
+      setReviewingApp(null);
+      fetchApplications();
+    } catch (error) {
+      toast.error(error.message || 'Error submitting review');
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   if (user?.role !== 'talent') {
@@ -228,10 +258,9 @@ const MyApplications = () => {
               {applications.map((application) => (
                 <div
                   key={application._id}
-                  className="application-card modern-app-card"
+                  className={`application-card modern-app-card application-card-status-${application.status}`}
                   style={{
                     background: '#fff',
-                    border: '1px solid #e5e7eb',
                     borderRadius: '1rem',
                     boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
                     padding: '2rem',
@@ -244,8 +273,6 @@ const MyApplications = () => {
                     transition: 'box-shadow 0.2s',
                     marginBottom: '1.5rem',
                   }}
-                  onMouseOver={e => e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.10)'}
-                  onMouseOut={e => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.04)'}
                 >
                   <div className="application-card-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
                     <div className="application-status" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -319,6 +346,16 @@ const MyApplications = () => {
                         <FaTrash /> Withdraw
                       </button>
                     )}
+                    {canLeaveReview(application) && (
+                      <button
+                        onClick={() => setReviewingApp(application)}
+                        className="application-btn application-btn-primary"
+                        style={{ padding: '0.5rem 1.2rem', borderRadius: '0.5rem', border: '1px solid #4f46e5', background: '#e0e7ff', color: '#3730a3', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem', transition: 'background 0.2s' }}
+                        disabled={!!reviewingApp}
+                      >
+                        <FaUser /> Leave a Review
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}
@@ -349,6 +386,21 @@ const MyApplications = () => {
           </div>
         )}
       </div>
+
+      {/* Review Modal/Inline Form */}
+      {reviewingApp && (
+        <div className="review-modal-bg">
+          <div className="review-modal">
+            <ReviewForm
+              event={reviewingApp.event}
+              talent={user}
+              onSubmit={handleReviewSubmit}
+              onCancel={() => setReviewingApp(null)}
+            />
+            {submittingReview && <div className="review-loading">Submitting...</div>}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

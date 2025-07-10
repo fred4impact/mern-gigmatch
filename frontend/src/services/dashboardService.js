@@ -53,6 +53,16 @@ const dashboardService = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Error fetching profile completion');
     }
+  },
+
+  // Get public stats for homepage (no auth)
+  getPublicStats: async () => {
+    try {
+      const response = await axios.get(`${API_URL}/dashboard/public-stats`);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error fetching public stats');
+    }
   }
 };
 

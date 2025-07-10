@@ -16,6 +16,11 @@ const ReviewSchema = new mongoose.Schema({
     ref: 'Event',
     required: true
   },
+  application: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Application',
+    required: true
+  },
   rating: {
     type: Number,
     required: true,
@@ -71,6 +76,7 @@ const ReviewSchema = new mongoose.Schema({
 // Indexes for efficient queries
 ReviewSchema.index({ reviewedUser: 1, createdAt: -1 });
 ReviewSchema.index({ event: 1 });
+ReviewSchema.index({ application: 1 });
 ReviewSchema.index({ reviewer: 1, reviewedUser: 1, event: 1 }, { unique: true });
 ReviewSchema.index({ status: 1 });
 

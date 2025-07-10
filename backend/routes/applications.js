@@ -27,6 +27,9 @@ router.put('/applications/:applicationId/read', protect, applicationController.m
 // Get application statistics
 router.get('/applications/stats', protect, applicationController.getApplicationStats);
 
+// Leave a review for a completed application/booking
+router.post('/applications/:applicationId/review', protect, applicationController.leaveReviewForApplication);
+
 // RESTful routes for test compatibility
 router.post('/', protect, applicationController.applyToEvent);
 router.get('/:id', protect, applicationController.getApplicationById);

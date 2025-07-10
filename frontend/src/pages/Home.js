@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Button, Card } from 'react-bootstrap';
 import { 
@@ -9,10 +9,35 @@ import {
   FaChartLine, 
   FaStar,
   FaUsers,
-  FaCalendarAlt
+  FaCalendarAlt,
+  FaUserTie, FaUserFriends, FaCalendarAlt as FaCalendarPlus, FaClipboardList, FaHandshake, FaMapMarkerAlt as FaMapMarkerAltPlus, FaUserPlus
 } from 'react-icons/fa';
+import dashboardService from '../services/dashboardService';
 
 const Home = () => {
+  const [stats, setStats] = useState(null);
+  const [loadingStats, setLoadingStats] = useState(true);
+  const [statsError, setStatsError] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    setLoadingStats(true);
+    dashboardService.getPublicStats()
+      .then(data => {
+        if (mounted) {
+          setStats(data);
+          setLoadingStats(false);
+        }
+      })
+      .catch(err => {
+        if (mounted) {
+          setStatsError(err.message);
+          setLoadingStats(false);
+        }
+      });
+    return () => { mounted = false; };
+  }, []);
+
   console.log('Home component rendering'); // Debug log
   
   const features = [
@@ -48,13 +73,6 @@ const Home = () => {
     }
   ];
 
-  const stats = [
-    { number: '1000+', label: 'Active Talents' },
-    { number: '500+', label: 'Successful Gigs' },
-    { number: '50+', label: 'Cities Covered' },
-    { number: '4.8', label: 'Average Rating' }
-  ];
-
   return (
     <div>
       {/* Hero Section */}
@@ -78,22 +96,6 @@ const Home = () => {
                 </Button>
               </div>
             </Col>
-          </Row>
-        </Container>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-5 bg-white">
-        <Container>
-          <Row className="text-center">
-            {stats.map((stat, index) => (
-              <Col key={index} md={3} sm={6} className="mb-4">
-                <div className="stat-card">
-                  <div className="stat-number">{stat.number}</div>
-                  <div className="text-muted">{stat.label}</div>
-                </div>
-              </Col>
-            ))}
           </Row>
         </Container>
       </section>
@@ -126,6 +128,60 @@ const Home = () => {
                 </Card>
               </Col>
             ))}
+          </Row>
+        </Container>
+      </section>
+
+      {/* Stats Section */}
+      <section className="py-5 bg-white">
+        <Container>
+          <Row className="g-4 justify-content-center">
+            {loadingStats && <Col><div>Loading stats...</div></Col>}
+            {statsError && <Col><div style={{color: 'red'}}>{statsError}</div></Col>}
+            {stats && (
+              <>
+                <Col md={3} sm={6} xs={12}>
+                  <Card className="stat-card border-0 shadow-lg text-center p-2 rounded-4 h-100 stat-card-hover" style={{ minHeight: 120, border: '0.75px solid #0d6efd', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                    <div className="stat-icon bg-primary bg-opacity-10 text-primary mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40, fontSize: 20 }}>
+                      <FaUsers />
+                    </div>
+                    <div className="text-uppercase small text-muted mb-1">Total</div>
+                    <div className="stat-number h3 fw-bold mb-1">{stats.talents + stats.planners}</div>
+                    <div className="stat-label text-secondary fw-semibold">Active Users</div>
+                  </Card>
+                </Col>
+                <Col md={3} sm={6} xs={12}>
+                  <Card className="stat-card border-0 shadow-lg text-center p-2 rounded-4 h-100 stat-card-hover" style={{ minHeight: 120, border: '0.75px solid #dc3545', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                    <div className="stat-icon bg-danger bg-opacity-10 text-danger mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40, fontSize: 20 }}>
+                      <FaMapMarkerAlt />
+                    </div>
+                    <div className="text-uppercase small text-muted mb-1">Total</div>
+                    <div className="stat-number h3 fw-bold mb-1">{stats.cities}</div>
+                    <div className="stat-label text-secondary fw-semibold">Cities Covered</div>
+                  </Card>
+                </Col>
+                <Col md={3} sm={6} xs={12}>
+                  <Card className="stat-card border-0 shadow-lg text-center p-2 rounded-4 h-100 stat-card-hover" style={{ minHeight: 120, border: '0.75px solid #fd7e14', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                    <div className="stat-icon bg-primary bg-opacity-10 text-primary mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40, fontSize: 20 }}>
+                      <FaCalendarPlus />
+                    </div>
+                    <div className="text-uppercase small text-muted mb-1">This Month</div>
+                    <div className="stat-number h3 fw-bold mb-1">{stats.newEventsThisMonth}</div>
+                    <div className="stat-label text-secondary fw-semibold">New Events</div>
+                  </Card>
+                </Col>
+                <Col md={3} sm={6} xs={12}>
+                  <Card className="stat-card border-0 shadow-lg text-center p-2 rounded-4 h-100 stat-card-hover" style={{ minHeight: 120, border: '0.75px solid #198754', transition: 'transform 0.2s, box-shadow 0.2s' }}>
+                    <div className="stat-icon bg-info bg-opacity-10 text-info mx-auto mb-2 rounded-circle d-flex align-items-center justify-content-center" style={{ width: 40, height: 40, fontSize: 20 }}>
+                      <FaCalendarAlt />
+                    </div>
+                    <div className="text-uppercase small text-muted mb-1">Total</div>
+                    <div className="stat-number h3 fw-bold mb-1">{stats.events}</div>
+                    <div className="stat-label text-secondary fw-semibold">Events Posted</div>
+                  </Card>
+                </Col>
+              </>
+            )}
           </Row>
         </Container>
       </section>
