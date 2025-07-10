@@ -119,6 +119,16 @@ const reviewService = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Error reporting review');
     }
+  },
+
+  // Submit a review for a completed application/booking
+  submitApplicationReview: async (applicationId, reviewData) => {
+    try {
+      const response = await api.post(`/applications/${applicationId}/review`, reviewData);
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Error submitting review');
+    }
   }
 };
 

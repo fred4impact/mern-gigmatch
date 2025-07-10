@@ -15,4 +15,7 @@ router.get('/recent-activity', protect, dashboardController.getRecentActivity);
 // Get profile completion percentage
 router.get('/profile-completion', protect, dashboardController.getProfileCompletion);
 
+// Public stats for homepage
+router.get('/public-stats', dashboardController.getPublicStats);
+
 module.exports = router; 
