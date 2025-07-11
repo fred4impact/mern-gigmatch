@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { FaChevronDown, FaUserCircle, FaUser, FaCog, FaSignOutAlt, FaTachometerAlt } from 'react-icons/fa';
+import { FaChevronDown, FaUserCircle, FaUser, FaCog, FaSignOutAlt, FaTachometerAlt, FaLock } from 'react-icons/fa';
 import './Navbar.css';
 
 const Navbar = () => {
@@ -70,6 +70,7 @@ const Navbar = () => {
                   </div>
                   <Link to="/profile" className="nav-dropdown-item"><FaUser /> My Profile</Link>
                   <Link to="/dashboard" className="nav-dropdown-item"><FaTachometerAlt /> Dashboard</Link>
+                  <Link to="/change-password" className="nav-dropdown-item"><FaLock /> Change Password</Link>
                   {/* Uncomment if you have a settings page: */}
                   {/* <Link to="/settings" className="nav-dropdown-item"><FaCog /> Settings</Link> */}
                   <button className="nav-dropdown-item nav-dropdown-logout" onClick={logout}><FaSignOutAlt /> Logout</button>

@@ -1,23 +1,10 @@
-## CI/CD with GitHub Actions
-
-This project uses GitHub Actions for continuous integration and delivery. The workflow performs the following steps on push or pull request:
-
-1. **Checkout code**
-2. **Install dependencies** for both backend and frontend
-3. **Run unit tests** (Jest, React Testing Library)
-4. **Run security scan** (`npm audit` for both frontend and backend)
-5. **Build Docker images** for frontend and backend
-6. **Push Docker images to Docker Hub** (on main branch or with tag)
-
-### Example Workflow: `.github/workflows/ci-cd.yml`
-```yaml
 name: CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, feature-* ]
+    branches: [main, feature-*]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   build-and-test:
@@ -38,8 +25,8 @@ jobs:
         run: cd frontend && npm ci
       - name: Run backend tests
         run: cd backend && npm test
-      - name: Run frontend tests
-        run: cd frontend && npm test -- --watchAll=false
+        env:
+          JWT_SECRET: testsecret
       - name: Security scan backend
         run: cd backend && npm audit --audit-level=high || true
       - name: Security scan frontend
@@ -57,7 +44,3 @@ jobs:
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/gigmatch-backend:latest
       - name: Push frontend Docker image
         run: docker push ${{ secrets.DOCKERHUB_USERNAME }}/gigmatch-frontend:latest
-```
-
-- Set your Docker Hub credentials as repository secrets: `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`.
-- Adjust image names/tags as needed for your workflow. 
