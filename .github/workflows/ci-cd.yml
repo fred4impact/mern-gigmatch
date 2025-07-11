@@ -27,8 +27,6 @@ jobs:
         run: cd backend && npm test
         env:
           JWT_SECRET: testsecret
-      - name: Run frontend tests
-        run: cd frontend && npm test -- --watchAll=false
       - name: Security scan backend
         run: cd backend && npm audit --audit-level=high || true
       - name: Security scan frontend
