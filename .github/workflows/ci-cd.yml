@@ -33,6 +33,11 @@ jobs:
         run: cd frontend && npm audit --audit-level=high || true
       - name: Build backend Docker image
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/gigmatch-backend:latest ./backend
+      - name: Scan backend Docker image with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ secrets.DOCKERHUB_USERNAME }}/gigmatch-backend:latest
+          severity: "HIGH,CRITICAL"
       - name: Build frontend Docker image
         run: docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/gigmatch-frontend:latest ./frontend
       - name: Login to Docker Hub
