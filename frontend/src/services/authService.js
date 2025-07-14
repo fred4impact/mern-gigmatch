@@ -1,7 +1,8 @@
 import axios from 'axios';
 
 // Use relative URL for proxy support
-const API_URL = '/api';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api';
+
 
 // Create axios instance
 const api = axios.create({

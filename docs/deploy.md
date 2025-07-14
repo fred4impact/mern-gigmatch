@@ -26,7 +26,7 @@
        volumes:
          - mongo-data:/data/db
      backend:
-       image: <your-dockerhub-username>/gigmatch-backend:latest
+       image: runtesting/gigmatch-backend:latest
        restart: always
        env_file:
          - ./backend/.env
@@ -35,7 +35,7 @@
        depends_on:
          - mongo
      frontend:
-       image: <your-dockerhub-username>/gigmatch-frontend:latest
+       image: runtesting/gigmatch-frontend:latest
        restart: always
        env_file:
          - ./frontend/.env
@@ -43,10 +43,11 @@
          - 3000:80
    volumes:
      mongo-data:
-   ```
+   ``
 4. **Run:**
    ```sh
    docker-compose up -d
+   docker-compose up --build
    ```
 5. **Access:**
    - Frontend: `http://<linode-ip>:3000`
