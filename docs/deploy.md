@@ -43,7 +43,7 @@
          - 3000:80
    volumes:
      mongo-data:
-   ```
+   ``
 4. **Run:**
    ```sh
    docker-compose up -d
