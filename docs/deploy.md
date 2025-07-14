@@ -47,6 +47,7 @@
 4. **Run:**
    ```sh
    docker-compose up -d
+   docker-compose up --build
    ```
 5. **Access:**
    - Frontend: `http://<linode-ip>:3000`
