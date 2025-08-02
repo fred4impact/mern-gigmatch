@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: your-registry/gigmatch-frontend:latest
+        image: runtesting/gigmatch-frontend:latest
         ports:
         - containerPort: 80
         resources:
