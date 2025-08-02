@@ -231,3 +231,6 @@ Now, you can deploy and manage your entire MERN stack (frontend, backend, and da
 - [Helm Docs](https://helm.sh/docs/)
 - [ArgoCD Docs](https://argo-cd.readthedocs.io/)
 - [Minikube Docs](https://minikube.sigs.k8s.io/) 
+
+---
+
