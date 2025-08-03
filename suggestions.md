@@ -1663,3 +1663,6 @@ curl http://localhost:5000/api/health
 ---
 
 **Remember: ArgoCD makes Kubernetes deployments as simple as `git push`! Your Git repository becomes the single source of truth for your entire infrastructure.** 
+
+use these as my mongodb service name 
+echo -n "mongodb://mongodb:27017/gigmatch" | base64
