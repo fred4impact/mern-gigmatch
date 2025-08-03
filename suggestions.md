@@ -853,4 +853,816 @@ echo "Access your app at: http://gigmatch.local"
 
 **Choose your deployment method based on your needs:**
 - **Without Helm**: More control, explicit manifests, easier to understand
-- **With Helm**: Easier management, templating, version control, better for complex deployments 
+- **With Helm**: Easier management, templating, version control, better for complex deployments
+- **With ArgoCD**: GitOps approach, automated deployments, declarative configuration
+
+---
+
+## 🚀 ArgoCD Deployment Guide
+
+### **What is ArgoCD?**
+ArgoCD is a GitOps continuous delivery tool for Kubernetes that automatically syncs your cluster state with your Git repository. It provides:
+- **Declarative GitOps**: Your Git repository is the single source of truth
+- **Automated Sync**: Automatic deployment when code changes
+- **Rollback Capability**: Easy rollback to previous versions
+- **Multi-cluster Support**: Manage multiple Kubernetes clusters
+- **Web UI**: Visual interface for monitoring deployments
+
+### **Prerequisites:**
+1. Kubernetes cluster (Minikube, GKE, EKS, AKS, etc.)
+2. kubectl configured to access your cluster
+3. Git repository with Kubernetes manifests
+4. ArgoCD installed on your cluster
+
+---
+
+## 📋 ArgoCD Installation Steps
+
+### **1. Install ArgoCD on Kubernetes**
+
+```bash
+# Create namespace for ArgoCD
+kubectl create namespace argocd
+
+# Install ArgoCD
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# Wait for all pods to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s
+```
+
+### **2. Access ArgoCD UI**
+
+```bash
+# Port forward ArgoCD server
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+# Get initial admin password
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+# Access UI at: https://localhost:8080
+# Username: admin
+# Password: (from command above)
+```
+
+### **3. Install ArgoCD CLI (Optional)**
+
+```bash
+# macOS
+brew install argocd
+
+# Linux
+curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
+rm argocd-linux-amd64
+
+# Login via CLI
+argocd login localhost:8080 --username admin --password <password>
+```
+
+---
+
+## 🔧 ArgoCD Application Configuration
+
+### **Current ArgoCD Application Manifest (argocd-app.yaml):**
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gigmatch
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: 'https://github.com/fred4impact/mern-gigmatch.git'
+    targetRevision: feature-dev
+    path: k8s
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: gigmatch
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+  revisionHistoryLimit: 10
+```
+
+### **Configuration Explanation:**
+
+- **repoURL**: Your GitHub repository URL
+- **targetRevision**: Git branch/tag to track (currently `feature-dev`)
+- **path**: Directory containing Kubernetes manifests (`k8s/`)
+- **namespace**: Target namespace for deployment (`gigmatch`)
+- **automated**: Enables automatic sync when Git changes
+- **prune**: Removes resources not in Git
+- **selfHeal**: Automatically corrects drift from Git state
+
+---
+
+## 🚀 Deploy with ArgoCD
+
+### **Method 1: Using kubectl**
+
+```bash
+# Apply the ArgoCD application
+kubectl apply -f argocd-app.yaml
+
+# Check application status
+kubectl get applications -n argocd
+kubectl describe application gigmatch -n argocd
+```
+
+### **Method 2: Using ArgoCD CLI**
+
+```bash
+# Create application
+argocd app create gigmatch \
+  --repo https://github.com/fred4impact/mern-gigmatch.git \
+  --path k8s \
+  --dest-server https://kubernetes.default.svc \
+  --dest-namespace gigmatch \
+  --revision feature-dev
+
+# Enable auto-sync
+argocd app set gigmatch --sync-policy automated
+
+# Sync application
+argocd app sync gigmatch
+```
+
+### **Method 3: Using ArgoCD UI**
+
+1. Open ArgoCD UI (https://localhost:8080)
+2. Click "New App"
+3. Fill in the details:
+   - **Application Name**: gigmatch
+   - **Project**: default
+   - **Repository URL**: https://github.com/fred4impact/mern-gigmatch.git
+   - **Revision**: feature-dev
+   - **Path**: k8s
+   - **Destination**: https://kubernetes.default.svc
+   - **Namespace**: gigmatch
+4. Enable "Auto-sync" and "Prune"
+5. Click "Create"
+
+---
+
+## 📊 Monitor Deployment
+
+### **Check Application Status:**
+
+```bash
+# Via kubectl
+kubectl get applications -n argocd
+kubectl describe application gigmatch -n argocd
+
+# Via ArgoCD CLI
+argocd app list
+argocd app get gigmatch
+argocd app logs gigmatch
+
+# Via ArgoCD UI
+# Navigate to the gigmatch application in the UI
+```
+
+### **Check Resource Status:**
+
+```bash
+# Check all resources in gigmatch namespace
+kubectl get all -n gigmatch
+
+# Check specific deployments
+kubectl get deployments -n gigmatch
+kubectl get pods -n gigmatch
+kubectl get services -n gigmatch
+
+# Check logs
+kubectl logs -f deployment/gigmatch-backend -n gigmatch
+kubectl logs -f deployment/gigmatch-frontend -n gigmatch
+```
+
+---
+
+## 🔄 GitOps Workflow
+
+### **Development Workflow:**
+
+1. **Make Changes**: Update your Kubernetes manifests in the `k8s/` directory
+2. **Commit & Push**: Push changes to your Git repository
+3. **Automatic Sync**: ArgoCD automatically detects changes and syncs
+4. **Monitor**: Check deployment status in ArgoCD UI
+
+### **Example Workflow:**
+
+```bash
+# 1. Make changes to manifests
+vim k8s/backend-deployment.yaml
+
+# 2. Commit and push
+git add k8s/backend-deployment.yaml
+git commit -m "Update backend deployment"
+git push origin feature-dev
+
+# 3. ArgoCD automatically syncs (if auto-sync is enabled)
+# 4. Monitor in ArgoCD UI or CLI
+argocd app sync gigmatch
+```
+
+---
+
+## 🛠️ Advanced ArgoCD Features
+
+### **1. Sync Options**
+
+```yaml
+syncOptions:
+  - CreateNamespace=true          # Create namespace if it doesn't exist
+  - PrunePropagationPolicy=foreground  # Wait for resources to be deleted
+  - PruneLast=true               # Prune after all resources are created
+  - Validate=true                # Validate manifests before applying
+```
+
+### **2. Sync Policies**
+
+```yaml
+syncPolicy:
+  automated:
+    prune: true                  # Remove resources not in Git
+    selfHeal: true              # Automatically correct drift
+    allowEmpty: false           # Don't allow empty applications
+  retry:
+    limit: 5                    # Retry failed syncs
+    backoff:
+      duration: 5s              # Wait between retries
+      factor: 2                 # Exponential backoff
+      maxDuration: 3m           # Maximum wait time
+```
+
+### **3. Application Sets (for multiple environments)**
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: gigmatch-environments
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - env: development
+        namespace: gigmatch-dev
+        branch: develop
+      - env: staging
+        namespace: gigmatch-staging
+        branch: staging
+      - env: production
+        namespace: gigmatch-prod
+        branch: main
+  template:
+    metadata:
+      name: 'gigmatch-{{env}}'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/fred4impact/mern-gigmatch.git'
+        targetRevision: '{{branch}}'
+        path: k8s
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+```
+
+---
+
+## 🔧 Troubleshooting
+
+### **Common Issues:**
+
+1. **Application Stuck in Progress**
+   ```bash
+   # Check application events
+   kubectl describe application gigmatch -n argocd
+   
+   # Check resource events
+   kubectl get events -n gigmatch --sort-by='.lastTimestamp'
+   ```
+
+2. **Sync Failed**
+   ```bash
+   # Check sync logs
+   argocd app logs gigmatch
+   
+   # Force sync
+   argocd app sync gigmatch --force
+   ```
+
+3. **Resources Not Created**
+   ```bash
+   # Check if namespace exists
+   kubectl get namespace gigmatch
+   
+   # Check application status
+   argocd app get gigmatch
+   ```
+
+4. **Image Pull Errors**
+   ```bash
+   # Check pod events
+   kubectl describe pod -l app=gigmatch-backend -n gigmatch
+   
+   # Check image pull secrets
+   kubectl get secrets -n gigmatch
+   ```
+
+---
+
+## 📈 Best Practices
+
+### **1. Repository Structure**
+```
+your-repo/
+├── k8s/                    # Kubernetes manifests
+│   ├── namespace.yaml
+│   ├── configmap.yaml
+│   ├── secret.yaml
+│   ├── backend-deployment.yaml
+│   ├── frontend-deployment.yaml
+│   └── ingress.yaml
+├── argocd-app.yaml         # ArgoCD application
+└── README.md
+```
+
+### **2. Branch Strategy**
+- **main**: Production manifests
+- **staging**: Staging environment
+- **develop**: Development environment
+- **feature-***: Feature branches
+
+### **3. Security**
+- Use private repositories for sensitive manifests
+- Implement RBAC for ArgoCD users
+- Use external secret management (Sealed Secrets, External Secrets Operator)
+
+### **4. Monitoring**
+- Set up alerts for sync failures
+- Monitor application health
+- Use ArgoCD notifications for deployment events
+
+---
+
+## 🎯 Complete ArgoCD Deployment Checklist
+
+- [ ] Install ArgoCD on Kubernetes cluster
+- [ ] Configure ArgoCD application manifest
+- [ ] Set up Git repository with Kubernetes manifests
+- [ ] Create ArgoCD application
+- [ ] Enable auto-sync
+- [ ] Test deployment workflow
+- [ ] Set up monitoring and alerts
+- [ ] Configure RBAC and security
+- [ ] Document deployment procedures
+- [ ] Train team on GitOps workflow
+
+---
+
+## 🚀 Quick Start Commands
+
+```bash
+# 1. Install ArgoCD
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+
+# 2. Wait for ArgoCD to be ready
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s
+
+# 3. Get admin password
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+
+# 4. Port forward ArgoCD UI
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+
+# 5. Apply your application
+kubectl apply -f argocd-app.yaml
+
+# 6. Access ArgoCD UI at https://localhost:8080
+# Username: admin
+# Password: (from step 3)
+```
+
+**ArgoCD provides a powerful GitOps solution that automates your Kubernetes deployments and ensures your cluster state matches your Git repository!**
+
+---
+
+## 🤔 **Common ArgoCD Questions & Clarifications**
+
+### **Q: Do I need to manually deploy manifests first before using ArgoCD?**
+
+**A: NO!** That's the beauty of GitOps. ArgoCD automatically handles everything.
+
+#### **What ArgoCD Does Automatically:**
+1. **Reads your Git repository** - Looks at the `k8s/` directory
+2. **Compares with cluster state** - Sees what's missing or different
+3. **Applies all manifests** - Creates/updates everything in the correct order
+4. **Manages dependencies** - Handles namespace creation, secrets, etc.
+
+#### **The Process:**
+```bash
+# 1. Just apply the ArgoCD application
+kubectl apply -f argocd-app.yaml
+
+# 2. ArgoCD automatically:
+#    - Creates the gigmatch namespace (if it doesn't exist)
+#    - Applies all manifests from k8s/ directory
+#    - Handles the correct order (namespace → secrets → deployments → services)
+```
+
+#### **What Happens When You Apply argocd-app.yaml:**
+
+ArgoCD will automatically create and manage:
+- ✅ **Namespace**: `gigmatch` (via `CreateNamespace=true`)
+- ✅ **ConfigMap**: `gigmatch-config`
+- ✅ **Secret**: `gigmatch-secret`
+- ✅ **MongoDB**: Deployment, Service, PVC
+- ✅ **Backend**: Deployment, Service
+- ✅ **Frontend**: Deployment, Service
+- ✅ **Ingress**: Network routing
+- ✅ **Network Policy**: Security rules
+- ✅ **HPA**: Auto-scaling
+
+#### **GitOps Workflow:**
+
+```bash
+# 1. Your current state: k8s/ directory has all manifests
+# 2. Apply ArgoCD application
+kubectl apply -f argocd-app.yaml
+
+# 3. ArgoCD automatically syncs and creates everything
+# 4. Monitor the sync
+kubectl get applications -n argocd
+argocd app sync gigmatch  # if needed
+
+# 5. Check your resources
+kubectl get all -n gigmatch
+```
+
+#### **Benefits of This Approach:**
+
+1. **Declarative**: You declare what you want in Git, ArgoCD makes it happen
+2. **Idempotent**: Safe to run multiple times
+3. **Order Management**: ArgoCD handles dependency order automatically
+4. **Drift Detection**: If someone manually changes the cluster, ArgoCD will correct it
+5. **Audit Trail**: All changes are tracked in Git
+
+#### **Monitor the Deployment:**
+
+```bash
+# Check ArgoCD application status
+kubectl get applications -n argocd
+kubectl describe application gigmatch -n argocd
+
+# Check if resources are being created
+kubectl get all -n gigmatch
+
+# Watch the sync process
+argocd app logs gigmatch -f
+```
+
+#### **Important Notes:**
+
+1. **Make sure your secrets are properly configured** in `k8s/secret.yaml`
+2. **Ensure your Docker images exist** and are accessible
+3. **Check that your repository is public** or ArgoCD has access to it
+4. **Verify the branch name** in `argocd-app.yaml` matches your current branch
+
+#### **Quick Start:**
+
+```bash
+# Just run this one command
+kubectl apply -f argocd-app.yaml
+
+# Then monitor
+kubectl get applications -n argocd
+kubectl get all -n gigmatch
+```
+
+**That's it!** ArgoCD will handle the rest automatically. This is the beauty of GitOps - you declare your desired state in Git, and ArgoCD makes your cluster match that state.
+
+---
+
+## 🔄 **ArgoCD vs Manual Deployment Comparison**
+
+### **Manual Deployment (Traditional Way):**
+```bash
+# Need to apply each manifest manually in order
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/secret.yaml
+kubectl apply -f k8s/mongodb-deployment.yaml
+kubectl apply -f k8s/backend-deployment.yaml
+kubectl apply -f k8s/frontend-deployment.yaml
+kubectl apply -f k8s/ingress.yaml
+# ... and so on
+```
+
+### **ArgoCD GitOps Way:**
+```bash
+# Just one command
+kubectl apply -f argocd-app.yaml
+# ArgoCD handles everything else automatically
+```
+
+### **Key Differences:**
+
+| Aspect | Manual Deployment | ArgoCD GitOps |
+|--------|------------------|---------------|
+| **Deployment** | Manual, step-by-step | Automatic, declarative |
+| **Order Management** | You must know dependencies | ArgoCD handles it |
+| **Drift Detection** | Manual checking required | Automatic correction |
+| **Rollback** | Manual process | Git-based rollback |
+| **Audit Trail** | Limited | Full Git history |
+| **Multi-environment** | Copy-paste manifests | Git branches |
+| **Team Collaboration** | Manual coordination | Git-based workflow |
+
+---
+
+## 🎯 **ArgoCD Best Practices for Your Project**
+
+### **1. Repository Structure**
+```
+mern-gigmatch/
+├── k8s/                    # ✅ Your current structure
+│   ├── namespace.yaml
+│   ├── configmap.yaml
+│   ├── secret.yaml
+│   ├── backend-deployment.yaml
+│   ├── frontend-deployment.yaml
+│   ├── mongodb-deployment.yaml
+│   ├── ingress.yaml
+│   ├── network-policy.yaml
+│   └── hpa.yaml
+├── argocd-app.yaml         # ✅ ArgoCD application
+├── backend/                # ✅ Application code
+├── frontend/               # ✅ Application code
+└── README.md
+```
+
+### **2. Branch Strategy for GitOps**
+```
+main/                      # Production manifests
+├── k8s/
+│   └── (production configs)
+└── argocd-app.yaml        # Points to main branch
+
+staging/                   # Staging manifests
+├── k8s/
+│   └── (staging configs)
+└── argocd-app.yaml        # Points to staging branch
+
+feature-dev/               # ✅ Your current branch
+├── k8s/
+│   └── (development configs)
+└── argocd-app.yaml        # Points to feature-dev branch
+```
+
+### **3. Environment-Specific Configurations**
+
+#### **Development (feature-dev branch):**
+```yaml
+# k8s/configmap.yaml
+data:
+  NODE_ENV: "development"
+  FRONTEND_URL: "http://localhost:3000"
+  PORT: "5000"
+```
+
+#### **Production (main branch):**
+```yaml
+# k8s/configmap.yaml
+data:
+  NODE_ENV: "production"
+  FRONTEND_URL: "https://gigmatch.com"
+  PORT: "5000"
+```
+
+### **4. ArgoCD Application Sets for Multiple Environments**
+
+```yaml
+# argocd-appset.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: gigmatch-environments
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - env: development
+        namespace: gigmatch-dev
+        branch: feature-dev
+        replicas: 1
+      - env: staging
+        namespace: gigmatch-staging
+        branch: staging
+        replicas: 2
+      - env: production
+        namespace: gigmatch-prod
+        branch: main
+        replicas: 3
+  template:
+    metadata:
+      name: 'gigmatch-{{env}}'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/fred4impact/mern-gigmatch.git'
+        targetRevision: '{{branch}}'
+        path: k8s
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+```
+
+---
+
+## 🚀 **Complete ArgoCD Deployment Workflow**
+
+### **Step 1: Install ArgoCD**
+```bash
+kubectl create namespace argocd
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=argocd-server -n argocd --timeout=300s
+```
+
+### **Step 2: Access ArgoCD**
+```bash
+kubectl port-forward svc/argocd-server -n argocd 8080:443
+kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+# Access: https://localhost:8080 (admin / password from above)
+```
+
+### **Step 3: Deploy Your Application**
+```bash
+# Apply ArgoCD application
+kubectl apply -f argocd-app.yaml
+
+# Monitor deployment
+kubectl get applications -n argocd
+kubectl get all -n gigmatch
+```
+
+### **Step 4: Verify Deployment**
+```bash
+# Check application status
+argocd app get gigmatch
+
+# Check resources
+kubectl get pods -n gigmatch
+kubectl get services -n gigmatch
+kubectl get ingress -n gigmatch
+
+# Check logs
+kubectl logs -f deployment/gigmatch-backend -n gigmatch
+kubectl logs -f deployment/gigmatch-frontend -n gigmatch
+```
+
+### **Step 5: Test Your Application**
+```bash
+# Get your application URL
+kubectl get ingress -n gigmatch
+
+# Or port forward for testing
+kubectl port-forward svc/gigmatch-frontend -n gigmatch 3000:80
+kubectl port-forward svc/gigmatch-backend -n gigmatch 5000:5000
+```
+
+---
+
+## 🔧 **Troubleshooting ArgoCD Deployment**
+
+### **Common Issues and Solutions:**
+
+#### **1. Application Stuck in "Progressing" State**
+```bash
+# Check application events
+kubectl describe application gigmatch -n argocd
+
+# Check resource events
+kubectl get events -n gigmatch --sort-by='.lastTimestamp'
+
+# Check if namespace exists
+kubectl get namespace gigmatch
+```
+
+#### **2. Sync Failed - Image Pull Errors**
+```bash
+# Check pod events
+kubectl describe pod -l app=gigmatch-backend -n gigmatch
+
+# Verify image exists
+docker pull runtesting/gigmatch-backend:latest
+
+# Check image pull secrets
+kubectl get secrets -n gigmatch
+```
+
+#### **3. Sync Failed - Secret Not Found**
+```bash
+# Check if secret exists
+kubectl get secret gigmatch-secret -n gigmatch
+
+# Verify secret configuration
+kubectl describe secret gigmatch-secret -n gigmatch
+
+# Check if secret is properly referenced in deployment
+kubectl get deployment gigmatch-backend -n gigmatch -o yaml | grep -A 10 -B 5 secretKeyRef
+```
+
+#### **4. Repository Access Issues**
+```bash
+# Check if repository is accessible
+git ls-remote https://github.com/fred4impact/mern-gigmatch.git
+
+# Verify branch exists
+git ls-remote https://github.com/fred4impact/mern-gigmatch.git feature-dev
+
+# Check ArgoCD repository configuration
+argocd repo list
+```
+
+#### **5. Force Sync and Retry**
+```bash
+# Force sync application
+argocd app sync gigmatch --force
+
+# Check sync logs
+argocd app logs gigmatch
+
+# Retry failed sync
+argocd app retry gigmatch
+```
+
+---
+
+## 📈 **Monitoring and Observability**
+
+### **1. ArgoCD Dashboard Metrics**
+- Application sync status
+- Resource health status
+- Sync frequency
+- Deployment history
+
+### **2. Kubernetes Resource Monitoring**
+```bash
+# Monitor resource usage
+kubectl top pods -n gigmatch
+kubectl top nodes
+
+# Check resource limits
+kubectl describe pods -n gigmatch | grep -A 5 -B 5 "Limits:"
+```
+
+### **3. Application Health Checks**
+```bash
+# Check application endpoints
+kubectl get endpoints -n gigmatch
+
+# Test health endpoints
+kubectl port-forward svc/gigmatch-backend -n gigmatch 5000:5000
+curl http://localhost:5000/api/health
+```
+
+---
+
+## 🎯 **Next Steps After ArgoCD Setup**
+
+1. **Set up monitoring** (Prometheus, Grafana)
+2. **Configure alerts** for sync failures
+3. **Implement CI/CD pipeline** integration
+4. **Set up backup strategies** for MongoDB
+5. **Configure SSL/TLS** certificates
+6. **Implement blue-green deployments**
+7. **Set up multi-cluster deployments**
+
+---
+
+**Remember: ArgoCD makes Kubernetes deployments as simple as `git push`! Your Git repository becomes the single source of truth for your entire infrastructure.** 
+
+use these as my mongodb service name 
+echo -n "mongodb://mongodb:27017/gigmatch" | base64
