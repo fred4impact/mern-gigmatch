@@ -1,0 +1,152 @@
+{{- if .Values.grafana.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gigmatch-monitoring.fullname" . }}-grafana
+  namespace: {{ .Values.global.namespaceOverride | default "monitoring" }}
+  labels:
+    {{- include "gigmatch-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "gigmatch-monitoring.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: grafana
+  template:
+    metadata:
+      labels:
+        {{- include "gigmatch-monitoring.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: grafana
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: grafana
+        image: "{{ .Values.grafana.image.repository }}:{{ .Values.grafana.image.tag }}"
+        imagePullPolicy: {{ .Values.grafana.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.grafana.service.port }}
+        env:
+        - name: GF_SECURITY_ADMIN_PASSWORD
+          value: {{ .Values.grafana.adminPassword | quote }}
+        - name: GF_USERS_ALLOW_SIGN_UP
+          value: {{ .Values.grafana.allowSignUp | quote }}
+        volumeMounts:
+        {{- if .Values.grafana.persistence.enabled }}
+        - name: grafana-storage
+          mountPath: /var/lib/grafana
+        {{- end }}
+        {{- if .Values.grafana.datasources }}
+        - name: grafana-datasources
+          mountPath: /etc/grafana/provisioning/datasources
+        {{- end }}
+        {{- if .Values.grafana.dashboardProviders }}
+        - name: grafana-dashboards
+          mountPath: /etc/grafana/provisioning/dashboards
+        {{- end }}
+        {{- with .Values.grafana.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /api/health
+            port: {{ .Values.grafana.service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /api/health
+            port: {{ .Values.grafana.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        {{- with .Values.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      {{- if .Values.grafana.persistence.enabled }}
+      - name: grafana-storage
+        persistentVolumeClaim:
+          claimName: {{ include "gigmatch-monitoring.fullname" . }}-grafana-pvc
+      {{- end }}
+      {{- if .Values.grafana.datasources }}
+      - name: grafana-datasources
+        configMap:
+          name: {{ include "gigmatch-monitoring.fullname" . }}-grafana-datasources
+      {{- end }}
+      {{- if .Values.grafana.dashboardProviders }}
+      - name: grafana-dashboards
+        configMap:
+          name: {{ include "gigmatch-monitoring.fullname" . }}-grafana-dashboards
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gigmatch-monitoring.grafanaServiceName" . }}
+  namespace: {{ .Values.global.namespaceOverride | default "monitoring" }}
+  labels:
+    {{- include "gigmatch-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
+spec:
+  selector:
+    {{- include "gigmatch-monitoring.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: grafana
+  ports:
+  - port: {{ .Values.grafana.service.port }}
+    targetPort: {{ .Values.grafana.service.port }}
+  type: {{ .Values.grafana.service.type }}
+{{- if .Values.grafana.persistence.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "gigmatch-monitoring.fullname" . }}-grafana-pvc
+  namespace: {{ .Values.global.namespaceOverride | default "monitoring" }}
+  labels:
+    {{- include "gigmatch-monitoring.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.grafana.persistence.size }}
+  {{- if .Values.grafana.persistence.storageClass }}
+  storageClassName: {{ .Values.grafana.persistence.storageClass }}
+  {{- end }}
+{{- end }}
+{{- if .Values.grafana.datasources }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gigmatch-monitoring.fullname" . }}-grafana-datasources
+  namespace: {{ .Values.global.namespaceOverride | default "monitoring" }}
+  labels:
+    {{- include "gigmatch-monitoring.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.grafana.datasources }}
+  {{ $key }}: |
+    {{- toYaml $value | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- if .Values.grafana.dashboardProviders }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gigmatch-monitoring.fullname" . }}-grafana-dashboards
+  namespace: {{ .Values.global.namespaceOverride | default "monitoring" }}
+  labels:
+    {{- include "gigmatch-monitoring.labels" . | nindent 4 }}
+data:
+  {{- range $key, $value := .Values.grafana.dashboardProviders }}
+  {{ $key }}: |
+    {{- toYaml $value | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }} 

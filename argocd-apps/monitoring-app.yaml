@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gigmatch-monitoring
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/your-username/mern-gigmatch.git
+    targetRevision: HEAD
+    path: helm/monitoring
+    helm:
+      valueFiles:
+        - values.yaml
+      # Optional: Override values for different environments
+      # values: |
+      #   grafana:
+      #     adminPassword: "your-secure-password"
+      #   prometheus:
+      #     persistence:
+      #       size: 20Gi
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+  
+  # Health checks
+  healthChecks:
+    - group: apps
+      kind: Deployment
+      name: gigmatch-monitoring-prometheus
+      namespace: monitoring
+    - group: apps
+      kind: Deployment
+      name: gigmatch-monitoring-grafana
+      namespace: monitoring
+    - group: apps
+      kind: DaemonSet
+      name: gigmatch-monitoring-node-exporter
+      namespace: monitoring
+    - group: apps
+      kind: Deployment
+      name: gigmatch-monitoring-mongodb-exporter
+      namespace: monitoring 

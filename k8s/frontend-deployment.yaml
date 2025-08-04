@@ -20,6 +20,17 @@ spec:
         image: runtesting/gigmatch-frontend:latest
         ports:
         - containerPort: 80
+        env:
+        - name: REACT_APP_API_URL
+          valueFrom:
+            configMapKeyRef:
+              name: gigmatch-config
+              key: REACT_APP_API_URL
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: gigmatch-config
+              key: NODE_ENV
         resources:
           requests:
             memory: "128Mi"

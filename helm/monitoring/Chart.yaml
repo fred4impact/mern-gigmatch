@@ -1,0 +1,17 @@
+apiVersion: v2
+name: gigmatch-monitoring
+description: A Helm chart for monitoring GigMatch application with Prometheus, Grafana, and exporters
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - monitoring
+  - prometheus
+  - grafana
+  - gigmatch
+home: https://github.com/your-org/gigmatch
+sources:
+  - https://github.com/your-org/gigmatch
+maintainers:
+  - name: GigMatch Team
+    email: team@gigmatch.com 
