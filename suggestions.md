@@ -902,7 +902,7 @@ kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.pas
 
 # Access UI at: https://localhost:8080
 # Username: admin
-# Password: (from command above)
+# Password: admin123
 ```
 
 ### **3. Install ArgoCD CLI (Optional)**

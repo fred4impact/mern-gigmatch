@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: 'https://github.com/fred4impact/mern-gigmatch.git'
-    targetRevision: feature-dev
+    targetRevision: main
     path: k8s
   destination:
     server: 'https://kubernetes.default.svc'
