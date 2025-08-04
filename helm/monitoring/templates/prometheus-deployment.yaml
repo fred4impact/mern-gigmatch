@@ -1,0 +1,112 @@
+{{- if .Values.prometheus.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "gigmatch-monitoring.fullname" . }}-prometheus
+  namespace: {{ .Values.global.namespaceOverride | default "monitoring" }}
+  labels:
+    {{- include "gigmatch-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "gigmatch-monitoring.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: prometheus
+  template:
+    metadata:
+      labels:
+        {{- include "gigmatch-monitoring.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: prometheus
+    spec:
+      serviceAccountName: {{ include "gigmatch-monitoring.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: prometheus
+        image: "{{ .Values.prometheus.image.repository }}:{{ .Values.prometheus.image.tag }}"
+        imagePullPolicy: {{ .Values.prometheus.image.pullPolicy }}
+        args:
+          - '--config.file=/etc/prometheus/prometheus.yml'
+          - '--storage.tsdb.path=/prometheus'
+          - '--web.console.libraries=/etc/prometheus/console_libraries'
+          - '--web.console.templates=/etc/prometheus/consoles'
+          - '--storage.tsdb.retention.time=200h'
+          - '--web.enable-lifecycle'
+        ports:
+        - containerPort: {{ .Values.prometheus.service.port }}
+        volumeMounts:
+        - name: prometheus-config
+          mountPath: /etc/prometheus
+        {{- if .Values.prometheus.persistence.enabled }}
+        - name: prometheus-storage
+          mountPath: /prometheus
+        {{- end }}
+        {{- with .Values.prometheus.resources }}
+        resources:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        livenessProbe:
+          httpGet:
+            path: /-/healthy
+            port: {{ .Values.prometheus.service.port }}
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /-/ready
+            port: {{ .Values.prometheus.service.port }}
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        {{- with .Values.securityContext }}
+        securityContext:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+      volumes:
+      - name: prometheus-config
+        configMap:
+          name: {{ include "gigmatch-monitoring.prometheusConfigName" . }}
+      {{- if .Values.prometheus.persistence.enabled }}
+      - name: prometheus-storage
+        persistentVolumeClaim:
+          claimName: {{ include "gigmatch-monitoring.fullname" . }}-prometheus-pvc
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "gigmatch-monitoring.prometheusServiceName" . }}
+  namespace: {{ .Values.global.namespaceOverride | default "monitoring" }}
+  labels:
+    {{- include "gigmatch-monitoring.labels" . | nindent 4 }}
+    app.kubernetes.io/component: prometheus
+spec:
+  selector:
+    {{- include "gigmatch-monitoring.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: prometheus
+  ports:
+  - port: {{ .Values.prometheus.service.port }}
+    targetPort: {{ .Values.prometheus.service.port }}
+  type: {{ .Values.prometheus.service.type }}
+{{- if .Values.prometheus.persistence.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "gigmatch-monitoring.fullname" . }}-prometheus-pvc
+  namespace: {{ .Values.global.namespaceOverride | default "monitoring" }}
+  labels:
+    {{- include "gigmatch-monitoring.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.prometheus.persistence.size }}
+  {{- if .Values.prometheus.persistence.storageClass }}
+  storageClassName: {{ .Values.prometheus.persistence.storageClass }}
+  {{- end }}
+{{- end }}
+{{- end }} 

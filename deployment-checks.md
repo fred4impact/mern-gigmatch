@@ -368,3 +368,41 @@ echo "=== Health Check Complete ==="
 - Check ingress configuration: `kubectl describe ingress -n gigmatch`
 
 This comprehensive guide will help you verify that your GigMatch application is running correctly in Kubernetes and troubleshoot any issues that may arise. 
+
+```bash
+# Restart frontend deployment
+kubectl rollout restart deployment/gigmatch-frontend -n gigmatch
+
+# Wait for the rollout to complete
+kubectl rollout status deployment/gigmatch-frontend -n gigmatch
+
+# Check if the ConfigMap was updated
+kubectl get configmap gigmatch-config -n gigmatch -o yaml
+
+# Check if frontend pods have the new environment variables
+kubectl exec -it $(kubectl get pods -l app=gigmatch-frontend -n gigmatch -o jsonpath='{.items[0].metadata.name}') -n gigmatch -- printenv | grep REACT_APP_API_URL
+
+
+
+# Check if the ConfigMap was updated
+kubectl get configmap gigmatch-config -n gigmatch -o yaml
+
+
+
+# Port forward to test the frontend
+kubectl port-forward svc/gigmatch-frontend -n gigmatch 3000:80
+
+# In another terminal, test the backend
+kubectl port-forward svc/gigmatch-backend -n gigmatch 5000:5000
+
+
+Alternative Solution: Use Ingress for External Access
+If you want to access the application from outside the cluster, you can also configure the frontend to use the ingress URL:
+Update ConfigMap for Ingress:
+
+# In k8s/configMap.yaml
+data:
+  NODE_ENV: development
+  FRONTEND_URL: http://gigmatch.local
+  PORT: "5000"
+  REACT_APP_API_URL: "http://gigmatch.local/api"
