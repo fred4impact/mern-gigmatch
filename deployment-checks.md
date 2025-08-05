@@ -192,6 +192,7 @@ kubectl logs -f deployment/ingress-nginx-controller -n ingress-nginx
 
 ## **12. ArgoCD Specific Commands**
 
+
 If using ArgoCD for deployment:
 
 ```bash
@@ -386,7 +387,6 @@ kubectl exec -it $(kubectl get pods -l app=gigmatch-frontend -n gigmatch -o json
 
 # Check if the ConfigMap was updated
 kubectl get configmap gigmatch-config -n gigmatch -o yaml
-
 
 
 # Port forward to test the frontend
