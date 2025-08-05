@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     repoURL: https://github.com/fred4impact/mern-gigmatch.git
-    targetRevision: main
+    targetRevision: feature-dev
     path: helm/monitoring
     helm:
       values: |

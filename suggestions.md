@@ -5,13 +5,13 @@
 ### 1. **Port Configuration Inconsistencies**
 
 **Problem Identified:**
-- **Backend code**: Uses port 5001 (due to AirPlay conflict on Mac)
+- **Backend code**: Uses port 5000 (due to AirPlay conflict on Mac)
 - **Dockerfile**: Exposes port 5000
-- **Helm values**: Mix of 5000 and 5001
+- **Helm values**: Mix of 5000 and 5000
 - **Docker Compose**: Uses port 5000
 
 **Root Cause:**
-The port mismatch between your local development (5001) and containerized deployment (5000) is causing confusion and potential connection issues.
+The port mismatch between your local development (5000) and containerized deployment (5000) is causing confusion and potential connection issues.
 
 ### 2. **Database Connectivity Issues**
 
@@ -185,10 +185,10 @@ spec:
 ### 1. **Fix Port Configuration**
 ```bash
 # Update backend server.js
-sed -i 's/PORT || 5001/PORT || 5000/' backend/server.js
+sed -i 's/PORT || 5000/PORT || 5000/' backend/server.js
 
 # Update Dockerfile
-sed -i 's/EXPOSE 5001/EXPOSE 5000/' backend/Dockerfile
+sed -i 's/EXPOSE 5000/EXPOSE 5000/' backend/Dockerfile
 
 # Update Helm values
 # Set all backend ports to 5000
@@ -1666,3 +1666,25 @@ curl http://localhost:5000/api/health
 
 use these as my mongodb service name 
 echo -n "mongodb://mongodb:27017/gigmatch" | base64
+
+Intsall the Nginx-ingress contorller
+
+#
+```bash
+# install these for auto scaller to work
+kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v1.8.2/deploy/static/provider/cloud/deploy.yaml
+
+kubectl get pods -n ingress-nginx
+
+kubectl describe ingress gigmatch-ingress -n gigmatch
+
+kubectl cluster-info
+
+ running on locall minikube do these
+
+ kubectl port-forward -n gigmatch svc/gigmatch-frontend 3000:80
+
+ # Access the forntend using 
+ http://localhost:3000

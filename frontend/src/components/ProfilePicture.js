@@ -102,7 +102,7 @@ const ProfilePicture = ({
       }
       // Always add a slash if missing
       const path = currentPicture.startsWith('/') ? currentPicture : `/${currentPicture}`;
-      return `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}${path}`;
+      return `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}${path}`;
     }
     return null;
   };

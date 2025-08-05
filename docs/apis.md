@@ -64,7 +64,7 @@ Below are the main API endpoints exposed by the backend, grouped by route. All e
 
 ### Register a New User (POST)
 ```sh
-curl -X POST http://<server-ip>:5001/api/auth/register \
+curl -X POST http://<server-ip>:5000/api/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "firstName": "Jane",
@@ -77,7 +77,7 @@ curl -X POST http://<server-ip>:5001/api/auth/register \
 
 ### Login (POST)
 ```sh
-curl -X POST http://<server-ip>:5001/api/auth/login \
+curl -X POST http://<server-ip>:5000/api/auth/login \
   -H "Content-Type: application/json" \
   -d '{
     "email": "jane@example.com",
@@ -87,12 +87,12 @@ curl -X POST http://<server-ip>:5001/api/auth/login \
 
 ### Get Public Stats (GET)
 ```sh
-curl http://<server-ip>:5001/api/dashboard/public-stats
+curl http://<server-ip>:5000/api/dashboard/public-stats
 ```
 
 ### Get Current User Profile (GET, with Bearer Token)
 ```sh
-curl http://<server-ip>:5001/api/auth/me \
+curl http://<server-ip>:5000/api/auth/me \
   -H "Authorization: Bearer <your-jwt-token>"
 ```
 

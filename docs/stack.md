@@ -221,13 +221,13 @@ View Stats → Track Applications → Monitor Profile Views → Review Performan
 ### **Development Environment**
 ```bash
 # Backend
-PORT=5001
+PORT=5000
 MONGODB_URI=mongodb://localhost:27017/gigmatch
 JWT_SECRET=your-secret-key
 FRONTEND_URL=http://localhost:3000
 
 # Frontend
-REACT_APP_API_URL=http://localhost:5001/api
+REACT_APP_API_URL=http://localhost:5000/api
 ```
 
 ### **Production Ready Features**

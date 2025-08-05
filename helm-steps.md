@@ -165,7 +165,7 @@ kubectl port-forward svc/gigmatch-gigmatch-frontend 8081:80
 
 ### Backend (API)
 ```sh
-kubectl port-forward svc/gigmatch-gigmatch-backend 5001:5001
+kubectl port-forward svc/gigmatch-gigmatch-backend 5000:5000
 ```
 - Access API: http://localhost:5000
 

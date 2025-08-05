@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const { metricsMiddleware, metricsEndpoint } = require('./metrics');
 require('dotenv').config();
 
 
@@ -21,11 +22,11 @@ app.use(cors({
       'http://localhost:3000',
       'http://localhost:3001',
       'http://localhost:5000',
-      'http://localhost:5001',
+      'http://localhost:5000',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:3001',
       'http://127.0.0.1:5000',
-      'http://127.0.0.1:5001'
+      'http://127.0.0.1:5000'
     ];
     
     if (allowedOrigins.indexOf(origin) !== -1) {
@@ -61,6 +62,9 @@ const uploadLimiter = rateLimit({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
+// Prometheus metrics middleware
+app.use(metricsMiddleware);
+
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/gigmatch', {
   useNewUrlParser: true,
@@ -88,6 +92,9 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Prometheus metrics endpoint
+app.get('/metrics', metricsEndpoint);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
