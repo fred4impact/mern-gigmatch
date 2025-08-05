@@ -16,8 +16,10 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/gigmatch
-      - NODE_ENV=production
+      - MONGODB_URI=mongodb://mongo:27017/gigmatch
+      - NODE_ENV=development
+      - JWT_SECRET=your-secret-key-here
+      - FRONTEND_URL=http://localhost:3000
     depends_on:
       - mongo
     working_dir: /usr/src/app
@@ -28,6 +30,8 @@ services:
     restart: unless-stopped
     ports:
       - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
     depends_on:
       - backend
 
