@@ -249,7 +249,7 @@ const EventApplications = () => {
                       <div className="ea-applicant-info">
                         <div className="ea-applicant-avatar">
                           {app.talent?.avatar ? (
-                            <img src={app.talent.avatar.startsWith('http') ? app.talent.avatar : `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/${app.talent.avatar}`} alt="avatar" />
+                            <img src={app.talent.avatar.startsWith('http') ? app.talent.avatar : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/${app.talent.avatar}`} alt="avatar" />
                           ) : (
                             <FaUser className="ea-applicant-avatar-icon" />
                           )}

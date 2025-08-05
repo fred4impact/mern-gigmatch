@@ -164,6 +164,10 @@ grafana:
           options:
             path: /etc/grafana/provisioning/dashboards
 
+  # Dashboards configuration
+  dashboards:
+    enabled: true
+
 # Node Exporter configuration
 nodeExporter:
   enabled: true

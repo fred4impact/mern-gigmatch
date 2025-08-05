@@ -1,0 +1,109 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gigmatch-monitoring
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/fred4impact/mern-gigmatch.git
+    targetRevision: feature-dev
+    path: helm/monitoring
+    helm:
+      values: |
+        global:
+          namespaceOverride: "monitoring"
+          nameOverride: "gigmatch-monitoring"
+        
+        prometheus:
+          enabled: true
+          persistence:
+            enabled: true
+            size: 5Gi
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+        
+        grafana:
+          enabled: true
+          persistence:
+            enabled: true
+            size: 2Gi
+          adminPassword: "admin123"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "250m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+          # Fix readiness probe timing
+          livenessProbe:
+            initialDelaySeconds: 60
+            periodSeconds: 30
+          readinessProbe:
+            initialDelaySeconds: 30
+            periodSeconds: 10
+        
+        nodeExporter:
+          enabled: true
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+        
+        mongodbExporter:
+          enabled: true
+          mongodbUri: "mongodb://mongodb.gigmatch.svc.cluster.local:27017"
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+        
+        ingress:
+          enabled: true
+          className: "nginx"
+          hosts:
+            - host: grafana.gigmatch.local
+              paths:
+                - path: /
+                  pathType: Prefix
+            - host: prometheus.gigmatch.local
+              paths:
+                - path: /
+                  pathType: Prefix
+        
+        rbac:
+          enabled: true
+          create: true
+        
+        serviceAccount:
+          create: true
+          name: "gigmatch-monitoring"
+  
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
+  
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+  
+  revisionHistoryLimit: 10 

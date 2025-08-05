@@ -48,7 +48,7 @@ const Navbar = () => {
             <div className="nav-user-menu" ref={menuRef}>
               <button className="nav-user-trigger" onClick={() => setMenuOpen((v) => !v)}>
                 {user?.avatar ? (
-                  <img src={user.avatar.startsWith('http') ? user.avatar : `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/${user.avatar}`} alt="avatar" className="nav-user-avatar" />
+                  <img src={user.avatar.startsWith('http') ? user.avatar : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/${user.avatar}`} alt="avatar" className="nav-user-avatar" />
                 ) : (
                   <FaUserCircle className="nav-user-avatar-placeholder" />
                 )}
@@ -59,7 +59,7 @@ const Navbar = () => {
                 <div className="nav-dropdown">
                   <div className="nav-dropdown-header">
                     {user?.avatar ? (
-                      <img src={user.avatar.startsWith('http') ? user.avatar : `${process.env.REACT_APP_API_URL || 'http://localhost:5001'}/${user.avatar}`} alt="avatar" className="nav-dropdown-avatar" />
+                      <img src={user.avatar.startsWith('http') ? user.avatar : `${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/${user.avatar}`} alt="avatar" className="nav-dropdown-avatar" />
                     ) : (
                       <FaUser className="nav-dropdown-avatar-placeholder" />
                     )}

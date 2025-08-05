@@ -5,6 +5,12 @@ metadata:
   namespace: gigmatch
 data:
   NODE_ENV: development
-  FRONTEND_URL: http://localhost:3000
+  FRONTEND_URL: http://gigmatch.local
   PORT: "5000"
-  REACT_APP_API_URL: "http://localhost:5000/api"
+  REACT_APP_API_URL: "http://gigmatch.local/api"
+
+
+  # use these if i want to view using frontend locally
+  # FRONTEND_URL: http://localhost:3000
+  # PORT: "5000"
+  # REACT_APP_API_URL: "http://localhost:5000/api"

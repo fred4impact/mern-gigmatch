@@ -4,13 +4,13 @@
 
 **Error Message:**
 ```
-Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at http://localhost:5001/api/auth/register. (Reason: CORS request did not succeed). Status code: (null).
+Cross-Origin Request Blocked: The Same Origin Policy disallows reading the remote resource at http://localhost:5000/api/auth/register. (Reason: CORS request did not succeed). Status code: (null).
 ```
 
 ## 🔍 Root Cause Analysis
 
 The error indicates that:
-1. **Port Mismatch**: Frontend expects backend on port 5001, but backend runs on port 5000
+1. **Port Mismatch**: Frontend expects backend on port 5000, but backend runs on port 5000
 2. **CORS Configuration**: Backend CORS settings may not allow the frontend origin
 3. **Environment Variables**: Incorrect API URL configuration
 
@@ -30,11 +30,11 @@ app.use(cors({
       'http://localhost:3000',
       'http://localhost:3001', 
       'http://localhost:5000',
-      'http://localhost:5001',
+      'http://localhost:5000',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:3001',
       'http://127.0.0.1:5000',
-      'http://127.0.0.1:5001'
+      'http://127.0.0.1:5000'
     ];
     
     if (!origin || allowedOrigins.indexOf(origin) !== -1) {

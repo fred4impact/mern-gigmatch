@@ -41,9 +41,9 @@ cd frontend && npm start
 ```
 
 ### Port Configuration
-- **Backend**: Port 5001 (changed from 5000 due to AirPlay conflict)
+- **Backend**: Port 5000 (changed from 5000 due to AirPlay conflict)
 - **Frontend**: Port 3000
-- **Frontend Proxy**: Points to http://localhost:5001
+- **Frontend Proxy**: Points to http://localhost:5000
 
 ### Database Commands
 ```bash
@@ -63,7 +63,7 @@ brew services restart mongodb-community
 ### API Testing
 ```bash
 # Health check
-curl http://localhost:5001/api/health
+curl http://localhost:5000/api/health
 
 # Expected response:
 # {"status":"OK","message":"GigMatch API is running","timestamp":"..."}
@@ -77,8 +77,8 @@ pkill -f "npm run dev"
 # Check what's using port 5000
 lsof -i :5000
 
-# Check what's using port 5001
-lsof -i :5001
+# Check what's using port 5000
+lsof -i :5000
 
 # Check what's using port 3000
 lsof -i :3000
@@ -117,7 +117,7 @@ mern-gigmatch/
 ```env
 # Server Configuration
 NODE_ENV=development
-PORT=5001
+PORT=5000
 FRONTEND_URL=http://localhost:3000
 
 # Database
@@ -131,7 +131,7 @@ JWT_EXPIRE=7d
 ### Frontend (package.json proxy)
 ```json
 {
-  "proxy": "http://localhost:5001"
+  "proxy": "http://localhost:5000"
 }
 ```
 
@@ -139,7 +139,7 @@ JWT_EXPIRE=7d
 
 ### Port 5000 Already in Use
 **Issue**: `Error: listen EADDRINUSE: address already in use :::5000`
-**Solution**: Change backend port to 5001 (AirPlay uses 5000 on macOS)
+**Solution**: Change backend port to 5000 (AirPlay uses 5000 on macOS)
 
 ### MongoDB Connection Issues
 **Issue**: Cannot connect to MongoDB
